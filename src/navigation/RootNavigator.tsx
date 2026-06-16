@@ -54,7 +54,7 @@ export function RootNavigator() {
           tabBarLabelStyle: { fontFamily: fonts.heading, fontSize: 11 },
           tabBarIcon: ({ color, size }) => {
             const icons: Record<string, React.ComponentProps<typeof MaterialCommunityIcons>['name']> = {
-              'Game Tracker': 'sword-cross',
+              'Malediction Companion': 'sword-cross',
               Cards: 'cards',
               Decks: 'book-open-variant',
             };
@@ -62,7 +62,7 @@ export function RootNavigator() {
           },
         })}
       >
-        <Tab.Screen name="Game Tracker" component={GameTrackerScreen} />
+        <Tab.Screen name="Malediction Companion" component={GameTrackerScreen} />
         <Tab.Screen name="Cards" component={CardsStackNavigator} options={{ headerShown: false }} />
         <Tab.Screen name="Decks" component={DecklistsScreen} />
       </Tab.Navigator>

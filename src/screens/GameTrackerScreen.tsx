@@ -55,7 +55,7 @@ export function GameTrackerScreen() {
   const adjustHusks = useGameStore((s) => s.adjustHusks);
 
   useEffect(() => {
-    if (isActive) {
+    if (isActive && players.length > 2) {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
     } else {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
@@ -63,7 +63,7 @@ export function GameTrackerScreen() {
     return () => {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
-  }, [isActive]);
+  }, [isActive, players.length]);
 
   if (!isActive) {
     return <PlayerSetupScreen />;

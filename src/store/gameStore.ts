@@ -63,8 +63,14 @@ export const useGameStore = create<GameStore>()(
         set((state) => {
           const player = state.players.find((p) => p.id === playerId);
           if (!player) return state;
-          const newHusks = Math.max(0, (player.husks ?? 0) + amount);
-          const delta = newHusks - (player.husks ?? 0);
+          const maxHusks = state.masteryGoal === 25 ? 2 : 4;
+          const currentHusks = player.husks ?? 0;
+          const totalOtherHusks = state.players
+            .filter((p) => p.id !== playerId)
+            .reduce((sum, p) => sum + (p.husks ?? 0), 0);
+          const maxForThisPlayer = Math.max(0, maxHusks - totalOtherHusks);
+          const newHusks = Math.min(Math.max(0, currentHusks + amount), maxForThisPlayer);
+          const delta = newHusks - currentHusks;
           if (delta === 0) return state;
           return {
             players: state.players.map((p) =>

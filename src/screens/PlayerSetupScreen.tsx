@@ -11,8 +11,8 @@ const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 6;
 
 const MASTERY_PRESETS = [
-  { value: 25, label: '25', tag: 'Beginner' },
-  { value: 45, label: '45', tag: 'Standard' },
+  { value: 25, label: '25' },
+  { value: 45, label: '45' },
   { value: 50, label: '50' },
   { value: 55, label: '55' },
   { value: 60, label: '60' },
@@ -58,7 +58,7 @@ export function PlayerSetupScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>New Game</Text>
+        <Text style={styles.title}>Step into the Malediction</Text>
         <Text style={styles.subtitle}>Malediction</Text>
 
         <Text style={styles.label}>Players</Text>
@@ -114,11 +114,6 @@ export function PlayerSetupScreen() {
               <Text style={[styles.masteryButtonValue, masteryGoal === preset.value && styles.masteryButtonValueActive]}>
                 {preset.label}
               </Text>
-              {preset.tag && (
-                <Text style={[styles.masteryButtonTag, masteryGoal === preset.value && styles.masteryButtonTagActive]}>
-                  {preset.tag}
-                </Text>
-              )}
             </TouchableOpacity>
           ))}
         </View>
@@ -257,17 +252,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   masteryButtonValueActive: {
-    color: colors.gold,
-  },
-  masteryButtonTag: {
-    fontFamily: fonts.heading,
-    fontSize: 8,
-    color: colors.textMuted,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginTop: 2,
-  },
-  masteryButtonTagActive: {
     color: colors.gold,
   },
   startButton: {
