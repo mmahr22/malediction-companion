@@ -21,6 +21,7 @@ type Navigation = NativeStackNavigationProp<CardsStackParamList, 'CardDatabase'>
 
 const TYPES: Card['type'][] = ['Unit', 'Spell', 'Attachment', 'Legacy', 'Terrain'];
 const RANKS: Card['rank'][] = ['Basic', 'Elite', 'Unique', 'Legendary'];
+const TRAITS = ['Seeker', 'Channel', 'Swift', 'Item', 'Relic'];
 const RANK_COLORS: Record<Card['rank'], string> = {
   Basic: colors.textMuted,
   Elite: colors.purple,
@@ -85,6 +86,7 @@ export function CardDatabaseScreen() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState<Card['type'] | null>(null);
   const [rank, setRank] = useState<Card['rank'] | null>(null);
+  const [trait, setTrait] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -92,9 +94,10 @@ export function CardDatabaseScreen() {
       if (q && !c.name.toLowerCase().includes(q) && !c.traits.some((t) => t.toLowerCase().includes(q))) return false;
       if (type && c.type !== type) return false;
       if (rank && c.rank !== rank) return false;
+      if (trait && !c.traits.includes(trait)) return false;
       return true;
     });
-  }, [query, type, rank]);
+  }, [query, type, rank, trait]);
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -132,6 +135,21 @@ export function CardDatabaseScreen() {
               active={rank === r}
               color={RANK_COLORS[r]}
               onPress={() => setRank(rank === r ? null : r)}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Trait filter */}
+      <View style={styles.filterSection}>
+        <Text style={styles.filterLabel}>TRAIT</Text>
+        <View style={styles.pillRow}>
+          {TRAITS.map((t) => (
+            <FilterPill
+              key={t}
+              label={t}
+              active={trait === t}
+              onPress={() => setTrait(trait === t ? null : t)}
             />
           ))}
         </View>
