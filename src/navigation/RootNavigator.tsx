@@ -62,7 +62,11 @@ export function RootNavigator() {
           },
         })}
       >
-        <Tab.Screen name="Malediction Companion" component={GameTrackerScreen} />
+        <Tab.Screen
+          name="Malediction Companion"
+          component={GameTrackerScreen}
+          options={{ title: 'Malediction Companion', tabBarLabel: 'Game Tracker' }}
+        />
         <Tab.Screen name="Cards" component={CardsStackNavigator} options={{ headerShown: false }} />
         <Tab.Screen name="Decks" component={DecklistsScreen} />
       </Tab.Navigator>
