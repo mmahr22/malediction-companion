@@ -36,6 +36,9 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Claude session marker (written by post-merge hook, consumed at next session start)
+.claude/pending-briefing
+
 # generated native folders
 /ios
 /android
