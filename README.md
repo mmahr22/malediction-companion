@@ -101,7 +101,7 @@ assets/
 
 | Faction | Color |
 |---|---|
-| Order of the Shattered Throne | Silver |
+| Order of the Shattered Throne | White |
 | Legion of the Fallen | Green |
 | Primal Blood | Red |
 | Conclave of the Spheres | Blue |
