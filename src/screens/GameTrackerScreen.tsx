@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { useGameStore } from '../store/gameStore';
 import { Player } from '../data/types';
 import { PlayerPanel } from '../components/PlayerPanel';
@@ -51,6 +52,17 @@ export function GameTrackerScreen() {
   const isActive = useGameStore((s) => s.isActive);
   const adjustMastery = useGameStore((s) => s.adjustMastery);
   const adjustEcho = useGameStore((s) => s.adjustEcho);
+
+  useEffect(() => {
+    if (isActive) {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    } else {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    }
+    return () => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    };
+  }, [isActive]);
 
   if (!isActive) {
     return <PlayerSetupScreen />;
