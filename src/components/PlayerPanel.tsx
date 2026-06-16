@@ -37,6 +37,7 @@ export function PlayerPanel({
   const masteryScale = useRef(new Animated.Value(1)).current;
   const masteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const masteryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const masteryIsRepeatingRef = useRef(false);
 
   useEffect(() => {
     Animated.sequence([
@@ -66,6 +67,7 @@ export function PlayerPanel({
 
   const startMastery = (amount: number) => {
     masteryTimeoutRef.current = setTimeout(() => {
+      masteryIsRepeatingRef.current = true;
       handleMastery(amount);
       masteryIntervalRef.current = setInterval(() => handleMastery(amount), 150);
     }, 400);
@@ -76,6 +78,7 @@ export function PlayerPanel({
     if (masteryIntervalRef.current) clearInterval(masteryIntervalRef.current);
     masteryTimeoutRef.current = null;
     masteryIntervalRef.current = null;
+    masteryIsRepeatingRef.current = false;
   };
 
   return (
@@ -94,7 +97,7 @@ export function PlayerPanel({
       {/* Top tap zone */}
       <TouchableOpacity
         style={styles.tapZone}
-        onPress={() => handleMastery(topAction)}
+        onPress={() => { if (!masteryIsRepeatingRef.current) handleMastery(topAction); }}
         onPressIn={() => startMastery(topAction * 10)}
         onPressOut={stopMastery}
         activeOpacity={0.6}
@@ -105,7 +108,7 @@ export function PlayerPanel({
       {/* Bottom tap zone */}
       <TouchableOpacity
         style={styles.tapZone}
-        onPress={() => handleMastery(bottomAction)}
+        onPress={() => { if (!masteryIsRepeatingRef.current) handleMastery(bottomAction); }}
         onPressIn={() => startMastery(bottomAction * 10)}
         onPressOut={stopMastery}
         activeOpacity={0.6}

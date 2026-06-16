@@ -13,6 +13,7 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
   const scale = useRef(new Animated.Value(1)).current;
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isRepeatingRef = useRef(false);
 
   useEffect(() => {
     Animated.sequence([
@@ -35,6 +36,7 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
 
   const startContinuous = (amount: number) => {
     timeoutRef.current = setTimeout(() => {
+      isRepeatingRef.current = true;
       handle(amount);
       intervalRef.current = setInterval(() => handle(amount), 150);
     }, 400);
@@ -45,6 +47,7 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
     if (intervalRef.current) clearInterval(intervalRef.current);
     timeoutRef.current = null;
     intervalRef.current = null;
+    isRepeatingRef.current = false;
   };
 
   return (
@@ -55,7 +58,7 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
       </View>
       <TouchableOpacity
         style={styles.btn}
-        onPress={() => handle(-1)}
+        onPress={() => { if (!isRepeatingRef.current) handle(-1); }}
         onPressIn={() => startContinuous(-10)}
         onPressOut={stopContinuous}
       >
@@ -64,7 +67,7 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
       <Animated.Text style={[styles.value, { transform: [{ scale }] }]}>{value}</Animated.Text>
       <TouchableOpacity
         style={styles.btn}
-        onPress={() => handle(1)}
+        onPress={() => { if (!isRepeatingRef.current) handle(1); }}
         onPressIn={() => startContinuous(10)}
         onPressOut={stopContinuous}
       >
