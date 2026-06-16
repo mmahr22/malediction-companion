@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useGameStore } from '../store/gameStore';
 import { Player } from '../data/types';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { RoundBar } from '../components/RoundBar';
 import { PlayerSetupScreen } from './PlayerSetupScreen';
-import { colors } from '../theme/theme';
+import { colors, fonts, spacing, radius } from '../theme/theme';
 
 type Rotation = 0 | 90 | 180 | 270;
 type LayoutCell = { player: Player; rotation: Rotation };
@@ -27,7 +28,6 @@ function buildLayout(players: Player[]): LayoutRow[] {
         { cells: [{ player: p3, rotation: 180 }] },
         { cells: [{ player: p1, rotation: 0 }, { player: p2, rotation: 0 }] },
       ];
-    // 4-player: simple 2×2 grid, top row rotated 180°, bottom row normal.
     case 4:
       return [
         { cells: [{ player: p4, rotation: 180 }, { player: p3, rotation: 180 }] },
@@ -52,9 +52,19 @@ export function GameTrackerScreen() {
   const navigation = useNavigation();
   const players = useGameStore((s) => s.players);
   const isActive = useGameStore((s) => s.isActive);
+  const masteryGoal = useGameStore((s) => s.masteryGoal);
   const adjustMastery = useGameStore((s) => s.adjustMastery);
   const adjustEcho = useGameStore((s) => s.adjustEcho);
   const adjustHusks = useGameStore((s) => s.adjustHusks);
+  const resetGame = useGameStore((s) => s.resetGame);
+
+  const winner = isActive ? players.find((p) => p.mastery >= masteryGoal) ?? null : null;
+
+  useEffect(() => {
+    if (winner) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+  }, [winner?.id]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -104,6 +114,17 @@ export function GameTrackerScreen() {
           </React.Fragment>
         ))}
       </View>
+
+      {winner && (
+        <View style={styles.winOverlay}>
+          <Text style={styles.winLabel}>Victory</Text>
+          <Text style={styles.winName}>{winner.name}</Text>
+          <Text style={styles.winScore}>{winner.mastery} Mastery</Text>
+          <TouchableOpacity style={styles.newGameBtn} onPress={resetGame}>
+            <Text style={styles.newGameText}>New Game</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -119,5 +140,47 @@ const styles = StyleSheet.create({
   row: {
     flex: 1,
     flexDirection: 'row',
+  },
+  winOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(11,7,16,0.93)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+  },
+  winLabel: {
+    fontFamily: fonts.display,
+    fontSize: 16,
+    color: colors.textMuted,
+    letterSpacing: 6,
+    textTransform: 'uppercase',
+  },
+  winName: {
+    fontFamily: fonts.display,
+    fontSize: 52,
+    color: colors.gold,
+    textAlign: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  winScore: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.textMuted,
+    letterSpacing: 2,
+  },
+  newGameBtn: {
+    marginTop: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.gold,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.xl * 2,
+    paddingVertical: spacing.md,
+    backgroundColor: 'rgba(212,175,55,0.1)',
+  },
+  newGameText: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.gold,
+    letterSpacing: 3,
   },
 });

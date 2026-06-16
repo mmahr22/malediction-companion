@@ -26,7 +26,7 @@ export function RoundBar() {
   return (
     <View style={styles.bar}>
       <TouchableOpacity style={styles.endButton} onPress={handleReset}>
-        <MaterialCommunityIcons name="skull-crossbones" size={16} color={colors.danger} />
+        <MaterialCommunityIcons name="reload" size={16} color={colors.danger} />
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.roundDisplay} onPress={handleIncrement} activeOpacity={0.7}>
