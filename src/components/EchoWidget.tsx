@@ -20,7 +20,7 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
   }, [value]);
 
   const handle = (amount: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(amount % 10 === 0 ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Light);
     onChange(amount);
   };
 
@@ -30,11 +30,11 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
         <MaterialCommunityIcons name="diamond-stone" size={9} color={colors.purple} />
         <Text style={styles.label}> ECHO</Text>
       </View>
-      <TouchableOpacity style={styles.btn} onPress={() => handle(-1)}>
+      <TouchableOpacity style={styles.btn} onPress={() => handle(-1)} onLongPress={() => handle(-10)}>
         <Text style={styles.btnText}>−</Text>
       </TouchableOpacity>
       <Animated.Text style={[styles.value, { transform: [{ scale }] }]}>{value}</Animated.Text>
-      <TouchableOpacity style={styles.btn} onPress={() => handle(1)}>
+      <TouchableOpacity style={styles.btn} onPress={() => handle(1)} onLongPress={() => handle(10)}>
         <Text style={styles.btnText}>+</Text>
       </TouchableOpacity>
     </View>

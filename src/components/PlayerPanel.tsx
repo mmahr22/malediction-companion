@@ -51,7 +51,7 @@ export function PlayerPanel({
   const echoPosition = { bottom: spacing.sm, left: spacing.lg, right: spacing.lg };
 
   const handleMastery = (amount: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Math.abs(amount) >= 10 ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium);
     onAdjustMastery(amount);
   };
 
@@ -72,6 +72,7 @@ export function PlayerPanel({
       <TouchableOpacity
         style={styles.tapZone}
         onPress={() => handleMastery(topAction)}
+        onLongPress={() => handleMastery(topAction * 10)}
         activeOpacity={0.6}
       >
         <Text style={styles.tapHint}>{topAction > 0 ? '+' : '−'}</Text>
@@ -81,6 +82,7 @@ export function PlayerPanel({
       <TouchableOpacity
         style={styles.tapZone}
         onPress={() => handleMastery(bottomAction)}
+        onLongPress={() => handleMastery(bottomAction * 10)}
         activeOpacity={0.6}
       >
         <Text style={styles.tapHint}>{bottomAction > 0 ? '+' : '−'}</Text>
