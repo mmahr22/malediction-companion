@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { CardsStackParamList } from '../navigation/types';
@@ -33,16 +33,37 @@ export function CardDetailScreen() {
   const { card } = params;
   const rankColor = RANK_COLORS[card.rank];
   const hasStats = card.type === 'Unit' && card.accuracy !== undefined;
+  const [lightboxVisible, setLightboxVisible] = useState(false);
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      {/* ── Lightbox modal ── */}
+      {card.image ? (
+        <Modal
+          visible={lightboxVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setLightboxVisible(false)}
+        >
+          <Pressable style={styles.lightboxBackdrop} onPress={() => setLightboxVisible(false)}>
+            <Image
+              source={{ uri: card.image }}
+              style={styles.lightboxImage}
+              resizeMode="contain"
+            />
+          </Pressable>
+        </Modal>
+      ) : null}
+
       <ScrollView>
         {/* ── Hero row ── */}
         <View style={styles.hero}>
           {/* Left: card image */}
           <View style={styles.imageColumn}>
             {card.image ? (
-              <Image source={{ uri: card.image }} style={styles.cardImage} resizeMode="contain" />
+              <Pressable onPress={() => setLightboxVisible(true)} style={{ flex: 1 }}>
+                <Image source={{ uri: card.image }} style={styles.cardImage} resizeMode="contain" />
+              </Pressable>
             ) : (
               <View style={styles.imagePlaceholder}>
                 <Text style={styles.imagePlaceholderGlyph}>?</Text>
@@ -134,6 +155,16 @@ const styles = StyleSheet.create({
   cardImage: {
     width: '100%',
     height: '100%',
+  },
+  lightboxBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lightboxImage: {
+    width: '90%',
+    height: '90%',
   },
   imagePlaceholder: {
     flex: 1,
