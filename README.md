@@ -55,6 +55,16 @@ npx expo start --web
 
 > **Note:** If using nvm, prefix commands with `PATH=~/.nvm/versions/node/<version>/bin:$PATH`
 
+### Git Hook (Claude Code users)
+
+After cloning, enable the post-merge hook so Claude Code automatically runs a session brief after every `git pull`:
+
+```bash
+chmod +x .git/hooks/post-merge
+```
+
+This hook drops a marker file that CLAUDE.md picks up at the start of your next Claude Code session, triggering the `/malediction` onboarding automatically.
+
 ---
 
 ## Tech Stack
