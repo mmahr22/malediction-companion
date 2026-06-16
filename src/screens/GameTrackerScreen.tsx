@@ -76,7 +76,7 @@ export function GameTrackerScreen() {
       <View style={styles.panels}>
         {rows.map((row, rowIndex) => (
           <React.Fragment key={rowIndex}>
-            {rowIndex > 0 && <View style={styles.divider} />}
+            {rowIndex > 0 && <RoundBar />}
             <View style={[styles.row, { flex: row.flex ?? 1 }]}>
               {row.cells.map(({ player, rotation }) => (
                 <PlayerPanel
@@ -92,8 +92,6 @@ export function GameTrackerScreen() {
           </React.Fragment>
         ))}
       </View>
-
-      <RoundBar />
     </SafeAreaView>
   );
 }
@@ -109,9 +107,5 @@ const styles = StyleSheet.create({
   row: {
     flex: 1,
     flexDirection: 'row',
-  },
-  divider: {
-    height: 2,
-    backgroundColor: colors.border,
   },
 });
