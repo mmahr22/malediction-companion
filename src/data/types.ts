@@ -65,7 +65,7 @@ export interface Card {
   slug: string;
   name: string;
   faction: string[];
-  type: 'Unit' | 'Channel' | 'Item' | 'Terrain' | 'Swift' | 'Relic';
+  type: 'Unit' | 'Spell' | 'Attachment' | 'Legacy' | 'Terrain';
   rank: 'Basic' | 'Elite' | 'Unique' | 'Legendary';
   traits: string[];
   cost: number;

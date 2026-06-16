@@ -27,7 +27,7 @@ const FACTION_SHORT: Record<string, string> = {
   'Primal Blood': 'Primal',
   'Conclave of the Spheres': 'Conclave',
 };
-const TYPES: Card['type'][] = ['Unit', 'Swift', 'Channel', 'Item', 'Relic', 'Terrain'];
+const TYPES: Card['type'][] = ['Unit', 'Spell', 'Attachment', 'Legacy', 'Terrain'];
 const RANKS: Card['rank'][] = ['Basic', 'Elite', 'Unique', 'Legendary'];
 const RANK_COLORS: Record<Card['rank'], string> = {
   Basic: colors.textMuted,

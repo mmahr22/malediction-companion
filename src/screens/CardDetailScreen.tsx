@@ -97,7 +97,7 @@ export function CardDetailScreen() {
             <Text style={styles.sectionLabel}>Rules Text</Text>
             {card.abilities.map((a, i) => (
               <View key={i} style={[styles.ability, i > 0 && styles.abilityDivider]}>
-                <Text style={styles.abilityName}>{a.name}</Text>
+                {a.name ? <Text style={styles.abilityName}>{a.name}</Text> : null}
                 <Text style={styles.abilityText}>{a.text}</Text>
               </View>
             ))}
