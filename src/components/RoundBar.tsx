@@ -8,17 +8,11 @@ import { colors, fonts, spacing } from '../theme/theme';
 export function RoundBar() {
   const round = useGameStore((s) => s.round);
   const incrementRound = useGameStore((s) => s.incrementRound);
-  const decrementRound = useGameStore((s) => s.decrementRound);
   const resetGame = useGameStore((s) => s.resetGame);
 
   const handleIncrement = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     incrementRound();
-  };
-
-  const handleDecrement = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    decrementRound();
   };
 
   const handleReset = () => {
@@ -35,18 +29,10 @@ export function RoundBar() {
         <MaterialCommunityIcons name="skull-crossbones" size={16} color={colors.danger} />
       </TouchableOpacity>
 
-      <View style={styles.roundControls}>
-        <TouchableOpacity style={styles.roundBtn} onPress={handleDecrement}>
-          <MaterialCommunityIcons name="minus" size={16} color={colors.gold} />
-        </TouchableOpacity>
-        <View style={styles.roundDisplay}>
-          <Text style={styles.roundLabel}>Round</Text>
-          <Text style={styles.roundNumber}>{round}</Text>
-        </View>
-        <TouchableOpacity style={styles.roundBtn} onPress={handleIncrement}>
-          <MaterialCommunityIcons name="plus" size={16} color={colors.gold} />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.roundDisplay} onPress={handleIncrement} activeOpacity={0.7}>
+        <Text style={styles.roundLabel}>Round</Text>
+        <Text style={styles.roundNumber}>{round}</Text>
+      </TouchableOpacity>
 
       {/* Spacer to balance the skull button */}
       <View style={styles.endButton} />
@@ -71,17 +57,10 @@ const styles = StyleSheet.create({
     width: 40,
     alignItems: 'center',
   },
-  roundControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  roundBtn: {
-    padding: 6,
-  },
   roundDisplay: {
     alignItems: 'center',
-    minWidth: 56,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: 4,
   },
   roundLabel: {
     fontFamily: fonts.heading,
@@ -92,8 +71,8 @@ const styles = StyleSheet.create({
   },
   roundNumber: {
     fontFamily: fonts.heading,
-    fontSize: 18,
+    fontSize: 32,
     color: colors.gold,
-    lineHeight: 22,
+    lineHeight: 38,
   },
 });
