@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGameStore } from '../store/gameStore';
-import { Seeker } from '../data/types';
+import { useProfileStore } from '../store/profileStore';
+import { PlayerProfile, Seeker } from '../data/types';
 import { SeekerPickerModal } from '../components/SeekerPickerModal';
+import { NewProfileModal } from '../components/NewProfileModal';
 import { FactionDots } from '../components/FactionDots';
 import { colors, fonts, radius, spacing } from '../theme/theme';
 
@@ -21,24 +23,30 @@ const MASTERY_PRESETS = [
 interface PlayerEntry {
   name: string;
   seeker: Seeker | null;
+  profileId: string | null;
 }
 
 function defaultEntries(count: number): PlayerEntry[] {
-  return Array.from({ length: count }, () => ({ name: '', seeker: null }));
+  return Array.from({ length: count }, () => ({ name: '', seeker: null, profileId: null }));
 }
 
 export function PlayerSetupScreen() {
   const startGame = useGameStore((s) => s.startGame);
+  const profiles = useProfileStore((s) => s.profiles);
+  const createProfile = useProfileStore((s) => s.createProfile);
+
   const [playerCount, setPlayerCount] = useState(2);
   const [entries, setEntries] = useState<PlayerEntry[]>(defaultEntries(2));
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const [masteryGoal, setMasteryGoal] = useState(45);
+  const [showNewProfile, setShowNewProfile] = useState(false);
+  const [newProfileForIndex, setNewProfileForIndex] = useState<number | null>(null);
 
   const setPlayerCountAndResize = (count: number) => {
     setPlayerCount(count);
     setEntries((prev) => {
       const next = [...prev];
-      while (next.length < count) next.push({ name: '', seeker: null });
+      while (next.length < count) next.push({ name: '', seeker: null, profileId: null });
       return next.slice(0, count);
     });
   };
@@ -47,19 +55,50 @@ export function PlayerSetupScreen() {
     setEntries((prev) => prev.map((e, i) => (i === index ? { ...e, name } : e)));
   };
 
+  const selectProfile = (index: number, profile: PlayerProfile) => {
+    setEntries((prev) =>
+      prev.map((e, i) =>
+        i === index ? { ...e, profileId: profile.id, name: profile.name } : e
+      )
+    );
+  };
+
+  const clearProfile = (index: number) => {
+    setEntries((prev) =>
+      prev.map((e, i) => (i === index ? { ...e, profileId: null, name: '' } : e))
+    );
+  };
+
   const assignSeeker = (index: number, seeker: Seeker) => {
     setEntries((prev) => prev.map((e, i) => (i === index ? { ...e, seeker } : e)));
   };
 
+  const handleNewProfile = (index: number) => {
+    setNewProfileForIndex(index);
+    setShowNewProfile(true);
+  };
+
+  const handleProfileCreated = (name: string, color: string) => {
+    const profile = createProfile(name, color);
+    if (newProfileForIndex !== null) {
+      selectProfile(newProfileForIndex, profile);
+    }
+    setShowNewProfile(false);
+    setNewProfileForIndex(null);
+  };
+
   const handleBegin = () => {
-    startGame(entries.map(({ name, seeker }) => ({ name, seeker })), masteryGoal);
+    startGame(
+      entries.map(({ name, seeker, profileId }) => ({ name, seeker, profileId })),
+      masteryGoal
+    );
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Step into the Malediction</Text>
-        <Text style={styles.subtitle}>Malediction</Text>
+        <Text style={styles.subtitle}>To step into the shadow of a dying god</Text>
 
         <Text style={styles.label}>Players</Text>
         <View style={styles.row}>
@@ -100,6 +139,39 @@ export function PlayerSetupScreen() {
                 <Text style={styles.seekerButtonPlaceholder}>Choose Seeker</Text>
               )}
             </TouchableOpacity>
+
+            {/* Profile picker */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.profileRow}
+            >
+              <TouchableOpacity
+                style={[styles.profilePill, entry.profileId === null && styles.profilePillGuest]}
+                onPress={() => clearProfile(i)}
+              >
+                <Text style={[styles.profilePillText, entry.profileId === null && styles.profilePillTextGuest]}>
+                  Guest
+                </Text>
+              </TouchableOpacity>
+              {profiles.map((p) => (
+                <TouchableOpacity
+                  key={p.id}
+                  style={[
+                    styles.profilePill,
+                    { borderColor: p.color },
+                    entry.profileId === p.id && { backgroundColor: `${p.color}30` },
+                  ]}
+                  onPress={() => selectProfile(i, p)}
+                >
+                  <View style={[styles.profileDot, { backgroundColor: p.color }]} />
+                  <Text style={[styles.profilePillText, { color: p.color }]}>{p.name}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity style={styles.newProfileBtn} onPress={() => handleNewProfile(i)}>
+                <Text style={styles.newProfileBtnText}>+ New</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
         ))}
 
@@ -130,6 +202,12 @@ export function PlayerSetupScreen() {
           if (pickerIndex !== null) assignSeeker(pickerIndex, seeker);
         }}
         onClose={() => setPickerIndex(null)}
+      />
+
+      <NewProfileModal
+        visible={showNewProfile}
+        onCreate={handleProfileCreated}
+        onClose={() => { setShowNewProfile(false); setNewProfileForIndex(null); }}
       />
     </SafeAreaView>
   );
@@ -230,6 +308,54 @@ const styles = StyleSheet.create({
   seekerButtonPlaceholder: {
     fontFamily: fonts.heading,
     fontSize: 13,
+    color: colors.textMuted,
+    letterSpacing: 1,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    paddingVertical: 2,
+  },
+  profilePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: 'transparent',
+  },
+  profilePillGuest: {
+    borderColor: colors.gold,
+    backgroundColor: 'rgba(212,175,55,0.1)',
+  },
+  profilePillText: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
+    color: colors.textMuted,
+    letterSpacing: 1,
+  },
+  profilePillTextGuest: {
+    color: colors.gold,
+  },
+  profileDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  newProfileBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderStyle: 'dashed',
+  },
+  newProfileBtnText: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
     color: colors.textMuted,
     letterSpacing: 1,
   },

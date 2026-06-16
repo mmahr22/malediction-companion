@@ -7,6 +7,7 @@ import { GameTrackerScreen } from '../screens/GameTrackerScreen';
 import { CardDatabaseScreen } from '../screens/CardDatabaseScreen';
 import { CardDetailScreen } from '../screens/CardDetailScreen';
 import { DecklistsScreen } from '../screens/DecklistsScreen';
+import { GameHistoryScreen } from '../screens/GameHistoryScreen';
 import { CardsStackParamList } from './types';
 import { colors, fonts } from '../theme/theme';
 
@@ -57,6 +58,7 @@ export function RootNavigator() {
               'Malediction Companion': 'sword-cross',
               Cards: 'cards',
               Decks: 'book-open-variant',
+              History: 'clock-outline',
             };
             return <MaterialCommunityIcons name={icons[route.name] ?? 'circle'} size={size} color={color} />;
           },
@@ -69,6 +71,7 @@ export function RootNavigator() {
         />
         <Tab.Screen name="Cards" component={CardsStackNavigator} options={{ headerShown: false }} />
         <Tab.Screen name="Decks" component={DecklistsScreen} />
+        <Tab.Screen name="History" component={GameHistoryScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );

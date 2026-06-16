@@ -5,6 +5,7 @@ import * as ScreenOrientation from 'expo-screen-orientation';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { useGameStore } from '../store/gameStore';
+import { useHistoryStore } from '../store/historyStore';
 import { Player } from '../data/types';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { RoundBar } from '../components/RoundBar';
@@ -53,11 +54,15 @@ export function GameTrackerScreen() {
   const players = useGameStore((s) => s.players);
   const isActive = useGameStore((s) => s.isActive);
   const masteryGoal = useGameStore((s) => s.masteryGoal);
+  const round = useGameStore((s) => s.round);
   const adjustMastery = useGameStore((s) => s.adjustMastery);
   const adjustEcho = useGameStore((s) => s.adjustEcho);
   const adjustHusks = useGameStore((s) => s.adjustHusks);
+  const initiativePlayerId = useGameStore((s) => s.initiativePlayerId);
+  const claimInitiative = useGameStore((s) => s.claimInitiative);
   const resetGame = useGameStore((s) => s.resetGame);
 
+  const addRecord = useHistoryStore((s) => s.addRecord);
   const [winner, setWinner] = useState<{ name: string; mastery: number } | null>(null);
 
   useEffect(() => {
@@ -67,6 +72,18 @@ export function GameTrackerScreen() {
   const handleClaimVictory = (player: Player) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setWinner({ name: player.name, mastery: player.mastery });
+    addRecord({
+      masteryGoal,
+      rounds: round,
+      players: players.map((p) => ({
+        name: p.name,
+        seekerName: p.seeker?.name ?? null,
+        finalMastery: p.mastery,
+        husks: p.husks,
+        isWinner: p.id === player.id,
+        profileId: p.profileId ?? undefined,
+      })),
+    });
   };
 
   useEffect(() => {
@@ -112,6 +129,8 @@ export function GameTrackerScreen() {
                   onAdjustEcho={(amount) => adjustEcho(player.id, amount)}
                   onAdjustHusks={(amount) => adjustHusks(player.id, amount)}
                   onClaimVictory={player.mastery >= masteryGoal ? () => handleClaimVictory(player) : undefined}
+                  hasInitiative={initiativePlayerId === player.id}
+                  onClaimInitiative={() => claimInitiative(player.id)}
                 />
               ))}
             </View>

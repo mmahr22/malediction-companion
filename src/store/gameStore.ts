@@ -6,6 +6,7 @@ import { GameState, Player, Seeker } from '../data/types';
 interface PlayerSetup {
   name: string;
   seeker: Seeker | null;
+  profileId: string | null;
 }
 
 interface GameStore extends GameState {
@@ -13,6 +14,7 @@ interface GameStore extends GameState {
   adjustMastery: (playerId: string, amount: number) => void;
   adjustEcho: (playerId: string, amount: number) => void;
   adjustHusks: (playerId: string, amount: number) => void;
+  claimInitiative: (playerId: string) => void;
   incrementRound: () => void;
   decrementRound: () => void;
   resetGame: () => void;
@@ -25,19 +27,22 @@ export const useGameStore = create<GameStore>()(
       isActive: false,
       round: 1,
       masteryGoal: 45,
+      initiativePlayerId: null,
 
       startGame: (playerSetups, masteryGoal) =>
         set({
           isActive: true,
           round: 1,
           masteryGoal,
-          players: playerSetups.map(({ name, seeker }, index): Player => ({
+          initiativePlayerId: null,
+          players: playerSetups.map(({ name, seeker, profileId }, index): Player => ({
             id: `player-${index}-${Date.now()}`,
             name: name.trim() || `Player ${index + 1}`,
             mastery: 0,
             echo: seeker?.legacy.startingEcho ?? 0,
             husks: 0,
             seeker,
+            profileId,
           })),
         }),
 
@@ -81,6 +86,8 @@ export const useGameStore = create<GameStore>()(
           };
         }),
 
+      claimInitiative: (playerId) => set({ initiativePlayerId: playerId }),
+
       // Advancing the round auto-adds Echo to every player.
       // Amount = round × 2, capped at round 5 (max 10 Echo per advance).
       incrementRound: () =>
@@ -98,7 +105,7 @@ export const useGameStore = create<GameStore>()(
 
       decrementRound: () => set((state) => ({ round: Math.max(1, state.round - 1) })),
 
-      resetGame: () => set({ players: [], isActive: false, round: 1, masteryGoal: 45 }),
+      resetGame: () => set({ players: [], isActive: false, round: 1, masteryGoal: 45, initiativePlayerId: null }),
     }),
     {
       name: 'malediction:gameState',
@@ -113,9 +120,11 @@ export const useGameStore = create<GameStore>()(
             echo: (p.echo ?? (p as Record<string, unknown>).resourcePoints ?? 0) as number,
             husks: (p.husks ?? 0) as number,
             seeker: (p.seeker ?? null) as unknown,
+            profileId: (p.profileId ?? null) as string | null,
           }));
         }
         if (state.masteryGoal === undefined) state.masteryGoal = 45;
+        if (state.initiativePlayerId === undefined) state.initiativePlayerId = null;
         return state;
       },
     }

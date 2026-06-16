@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Player } from '../data/types';
 import { FactionDots } from './FactionDots';
@@ -25,6 +26,8 @@ interface PlayerPanelProps {
   onAdjustEcho: (amount: number) => void;
   onAdjustHusks: (amount: number) => void;
   onClaimVictory?: () => void;
+  hasInitiative: boolean;
+  onClaimInitiative: () => void;
 }
 
 export function PlayerPanel({
@@ -35,6 +38,8 @@ export function PlayerPanel({
   onAdjustEcho,
   onAdjustHusks,
   onClaimVictory,
+  hasInitiative,
+  onClaimInitiative,
 }: PlayerPanelProps) {
   const masteryScale = useRef(new Animated.Value(1)).current;
   const masteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -125,9 +130,22 @@ export function PlayerPanel({
       </TouchableOpacity>
 
       {/* Name header — pinned to top of panel */}
-      <View style={styles.nameHeader} pointerEvents="none">
-        <View style={styles.playerNameBadge}>
-          <Text style={styles.playerName}>{player.name}</Text>
+      <View style={styles.nameHeader} pointerEvents="box-none">
+        <View style={styles.nameRow}>
+          <View style={styles.playerNameBadge}>
+            <Text style={styles.playerName}>{player.name}</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.initiativeIcon, hasInitiative && styles.initiativeIconActive]}
+            onPress={onClaimInitiative}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name="sword-cross"
+              size={12}
+              color={hasInitiative ? colors.gold : 'rgba(255,255,255,0.25)'}
+            />
+          </TouchableOpacity>
         </View>
         {player.seeker && (
           <View style={styles.seekerRow}>
@@ -200,6 +218,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     paddingBottom: 52,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  initiativeIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  initiativeIconActive: {
+    borderColor: colors.gold,
+    backgroundColor: 'rgba(212,175,55,0.2)',
   },
   claimBtn: {
     borderWidth: 1,

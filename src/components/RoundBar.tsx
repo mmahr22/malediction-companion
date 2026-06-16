@@ -1,26 +1,50 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useGameStore } from '../store/gameStore';
+import { useHistoryStore } from '../store/historyStore';
 import { colors, fonts, spacing } from '../theme/theme';
 
 export function RoundBar() {
   const round = useGameStore((s) => s.round);
+  const players = useGameStore((s) => s.players);
+  const masteryGoal = useGameStore((s) => s.masteryGoal);
   const incrementRound = useGameStore((s) => s.incrementRound);
   const resetGame = useGameStore((s) => s.resetGame);
+  const addRecord = useHistoryStore((s) => s.addRecord);
 
   const handleIncrement = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     incrementRound();
   };
 
+  const recordAndReset = () => {
+    addRecord({
+      masteryGoal,
+      rounds: round,
+      players: players.map((p) => ({
+        name: p.name,
+        seekerName: p.seeker?.name ?? null,
+        finalMastery: p.mastery,
+        husks: p.husks,
+        isWinner: false,
+        profileId: p.profileId ?? undefined,
+      })),
+    });
+    resetGame();
+  };
+
   const handleReset = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    Alert.alert('End Game', 'End the current game and clear all scores?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'End Game', style: 'destructive', onPress: resetGame },
-    ]);
+    if (Platform.OS === 'web') {
+      if (window.confirm('End the current game and clear all scores?')) recordAndReset();
+    } else {
+      Alert.alert('End Game', 'End the current game and clear all scores?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'End Game', style: 'destructive', onPress: recordAndReset },
+      ]);
+    }
   };
 
   return (
