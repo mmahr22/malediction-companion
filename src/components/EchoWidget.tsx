@@ -11,6 +11,8 @@ interface EchoWidgetProps {
 
 export function EchoWidget({ value, onChange }: EchoWidgetProps) {
   const scale = useRef(new Animated.Value(1)).current;
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     Animated.sequence([
@@ -19,9 +21,30 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
     ]).start();
   }, [value]);
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
   const handle = (amount: number) => {
-    Haptics.impactAsync(amount % 10 === 0 ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Math.abs(amount) >= 10 ? Haptics.ImpactFeedbackStyle.Medium : Haptics.ImpactFeedbackStyle.Light);
     onChange(amount);
+  };
+
+  const startContinuous = (amount: number) => {
+    timeoutRef.current = setTimeout(() => {
+      handle(amount);
+      intervalRef.current = setInterval(() => handle(amount), 150);
+    }, 400);
+  };
+
+  const stopContinuous = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    timeoutRef.current = null;
+    intervalRef.current = null;
   };
 
   return (
@@ -30,11 +53,21 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
         <MaterialCommunityIcons name="diamond-stone" size={9} color={colors.purple} />
         <Text style={styles.label}> ECHO</Text>
       </View>
-      <TouchableOpacity style={styles.btn} onPress={() => handle(-1)} onLongPress={() => handle(-10)}>
+      <TouchableOpacity
+        style={styles.btn}
+        onPress={() => handle(-1)}
+        onPressIn={() => startContinuous(-10)}
+        onPressOut={stopContinuous}
+      >
         <Text style={styles.btnText}>−</Text>
       </TouchableOpacity>
       <Animated.Text style={[styles.value, { transform: [{ scale }] }]}>{value}</Animated.Text>
-      <TouchableOpacity style={styles.btn} onPress={() => handle(1)} onLongPress={() => handle(10)}>
+      <TouchableOpacity
+        style={styles.btn}
+        onPress={() => handle(1)}
+        onPressIn={() => startContinuous(10)}
+        onPressOut={stopContinuous}
+      >
         <Text style={styles.btnText}>+</Text>
       </TouchableOpacity>
     </View>

@@ -35,6 +35,8 @@ export function PlayerPanel({
   onAdjustHusks,
 }: PlayerPanelProps) {
   const masteryScale = useRef(new Animated.Value(1)).current;
+  const masteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const masteryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     Animated.sequence([
@@ -42,6 +44,13 @@ export function PlayerPanel({
       Animated.spring(masteryScale, { toValue: 1, useNativeDriver: false, speed: 30, bounciness: 0 }),
     ]).start();
   }, [player.mastery]);
+
+  useEffect(() => {
+    return () => {
+      if (masteryTimeoutRef.current) clearTimeout(masteryTimeoutRef.current);
+      if (masteryIntervalRef.current) clearInterval(masteryIntervalRef.current);
+    };
+  }, []);
 
   // React Native transforms touch coordinates along with the visual rotation,
   // so top always increments and bottom always decrements for every panel.
@@ -53,6 +62,20 @@ export function PlayerPanel({
   const handleMastery = (amount: number) => {
     Haptics.impactAsync(Math.abs(amount) >= 10 ? Haptics.ImpactFeedbackStyle.Heavy : Haptics.ImpactFeedbackStyle.Medium);
     onAdjustMastery(amount);
+  };
+
+  const startMastery = (amount: number) => {
+    masteryTimeoutRef.current = setTimeout(() => {
+      handleMastery(amount);
+      masteryIntervalRef.current = setInterval(() => handleMastery(amount), 150);
+    }, 400);
+  };
+
+  const stopMastery = () => {
+    if (masteryTimeoutRef.current) clearTimeout(masteryTimeoutRef.current);
+    if (masteryIntervalRef.current) clearInterval(masteryIntervalRef.current);
+    masteryTimeoutRef.current = null;
+    masteryIntervalRef.current = null;
   };
 
   return (
@@ -72,7 +95,8 @@ export function PlayerPanel({
       <TouchableOpacity
         style={styles.tapZone}
         onPress={() => handleMastery(topAction)}
-        onLongPress={() => handleMastery(topAction * 10)}
+        onPressIn={() => startMastery(topAction * 10)}
+        onPressOut={stopMastery}
         activeOpacity={0.6}
       >
         <Text style={styles.tapHint}>{topAction > 0 ? '+' : '−'}</Text>
@@ -82,7 +106,8 @@ export function PlayerPanel({
       <TouchableOpacity
         style={styles.tapZone}
         onPress={() => handleMastery(bottomAction)}
-        onLongPress={() => handleMastery(bottomAction * 10)}
+        onPressIn={() => startMastery(bottomAction * 10)}
+        onPressOut={stopMastery}
         activeOpacity={0.6}
       >
         <Text style={styles.tapHint}>{bottomAction > 0 ? '+' : '−'}</Text>
