@@ -63,8 +63,8 @@ export function CardDetailScreen() {
               {card.faction.map((f) => (
                 <View key={f} style={[styles.factionBadge, { borderColor: FACTION_COLORS[f] ?? colors.border }]}>
                   <Image source={FACTION_IMAGES[f]} style={styles.factionIcon} />
-                  <Text style={[styles.factionText, { color: FACTION_COLORS[f] ?? colors.textMuted }]} numberOfLines={1}>
-                    {f.split(' ').slice(-1)[0]}
+                  <Text style={[styles.factionText, { color: FACTION_COLORS[f] ?? colors.textMuted }]}>
+                    {f}
                   </Text>
                 </View>
               ))}
@@ -178,6 +178,7 @@ const styles = StyleSheet.create({
   factionBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 1,
     gap: 4,
     paddingHorizontal: 7,
     paddingVertical: 3,

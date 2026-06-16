@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import {
   FlatList,
   Image,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -15,18 +14,11 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { cards } from '../data/cards';
 import { Card } from '../data/types';
 import { CardsStackParamList } from '../navigation/types';
-import { FACTION_COLORS, FACTION_IMAGES } from '../theme/factions';
+import { FACTION_IMAGES } from '../theme/factions';
 import { colors, fonts, radius, spacing } from '../theme/theme';
 
 type Navigation = NativeStackNavigationProp<CardsStackParamList, 'CardDatabase'>;
 
-const FACTIONS = ['Order of the Shattered Throne', 'Legion of the Fallen', 'Primal Blood', 'Conclave of the Spheres'];
-const FACTION_SHORT: Record<string, string> = {
-  'Order of the Shattered Throne': 'Order',
-  'Legion of the Fallen': 'Legion',
-  'Primal Blood': 'Primal',
-  'Conclave of the Spheres': 'Conclave',
-};
 const TYPES: Card['type'][] = ['Unit', 'Spell', 'Attachment', 'Legacy', 'Terrain'];
 const RANKS: Card['rank'][] = ['Basic', 'Elite', 'Unique', 'Legendary'];
 const RANK_COLORS: Record<Card['rank'], string> = {
@@ -91,7 +83,6 @@ function CardRow({ card, onPress }: { card: Card; onPress: () => void }) {
 export function CardDatabaseScreen() {
   const navigation = useNavigation<Navigation>();
   const [query, setQuery] = useState('');
-  const [faction, setFaction] = useState<string | null>(null);
   const [type, setType] = useState<Card['type'] | null>(null);
   const [rank, setRank] = useState<Card['rank'] | null>(null);
 
@@ -99,12 +90,11 @@ export function CardDatabaseScreen() {
     const q = query.trim().toLowerCase();
     return cards.filter((c) => {
       if (q && !c.name.toLowerCase().includes(q) && !c.traits.some((t) => t.toLowerCase().includes(q))) return false;
-      if (faction && !c.faction.includes(faction)) return false;
       if (type && c.type !== type) return false;
       if (rank && c.rank !== rank) return false;
       return true;
     });
-  }, [query, faction, type, rank]);
+  }, [query, type, rank]);
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -116,41 +106,36 @@ export function CardDatabaseScreen() {
         onChangeText={setQuery}
       />
 
-      {/* Faction filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-        <FilterPill label="All" active={faction === null} onPress={() => setFaction(null)} />
-        {FACTIONS.map((f) => (
-          <FilterPill
-            key={f}
-            label={FACTION_SHORT[f]}
-            active={faction === f}
-            color={FACTION_COLORS[f]}
-            onPress={() => setFaction(faction === f ? null : f)}
-          />
-        ))}
-      </ScrollView>
+      {/* Type filter */}
+      <View style={styles.filterSection}>
+        <Text style={styles.filterLabel}>TYPE</Text>
+        <View style={styles.pillRow}>
+          {TYPES.map((t) => (
+            <FilterPill
+              key={t}
+              label={t}
+              active={type === t}
+              onPress={() => setType(type === t ? null : t)}
+            />
+          ))}
+        </View>
+      </View>
 
-      {/* Type + Rank filter */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-        {TYPES.map((t) => (
-          <FilterPill
-            key={t}
-            label={t}
-            active={type === t}
-            onPress={() => setType(type === t ? null : t)}
-          />
-        ))}
-        <View style={styles.filterDivider} />
-        {RANKS.map((r) => (
-          <FilterPill
-            key={r}
-            label={r}
-            active={rank === r}
-            color={RANK_COLORS[r]}
-            onPress={() => setRank(rank === r ? null : r)}
-          />
-        ))}
-      </ScrollView>
+      {/* Rarity filter */}
+      <View style={styles.filterSection}>
+        <Text style={styles.filterLabel}>RARITY</Text>
+        <View style={styles.pillRow}>
+          {RANKS.map((r) => (
+            <FilterPill
+              key={r}
+              label={r}
+              active={rank === r}
+              color={RANK_COLORS[r]}
+              onPress={() => setRank(rank === r ? null : r)}
+            />
+          ))}
+        </View>
+      </View>
 
       <Text style={styles.count}>{filtered.length} card{filtered.length !== 1 ? 's' : ''}</Text>
 
@@ -184,11 +169,23 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontFamily: fonts.heading,
   },
-  filterRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
+  filterSection: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    paddingTop: spacing.sm,
+    paddingBottom: 2,
+  },
+  filterLabel: {
+    fontFamily: fonts.heading,
+    fontSize: 9,
+    color: colors.textMuted,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginBottom: 5,
+  },
+  pillRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
   },
   pill: {
     paddingHorizontal: 12,
@@ -203,11 +200,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.textMuted,
     letterSpacing: 1,
-  },
-  filterDivider: {
-    width: 1,
-    backgroundColor: colors.border,
-    marginHorizontal: 4,
   },
   count: {
     fontFamily: fonts.heading,
