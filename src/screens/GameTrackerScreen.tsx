@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -58,13 +58,16 @@ export function GameTrackerScreen() {
   const adjustHusks = useGameStore((s) => s.adjustHusks);
   const resetGame = useGameStore((s) => s.resetGame);
 
-  const winner = isActive ? players.find((p) => p.mastery >= masteryGoal) ?? null : null;
+  const [winner, setWinner] = useState<{ name: string; mastery: number } | null>(null);
 
   useEffect(() => {
-    if (winner) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-  }, [winner?.id]);
+    if (!isActive) setWinner(null);
+  }, [isActive]);
+
+  const handleClaimVictory = (player: Player) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setWinner({ name: player.name, mastery: player.mastery });
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -108,6 +111,7 @@ export function GameTrackerScreen() {
                   onAdjustMastery={(amount) => adjustMastery(player.id, amount)}
                   onAdjustEcho={(amount) => adjustEcho(player.id, amount)}
                   onAdjustHusks={(amount) => adjustHusks(player.id, amount)}
+                  onClaimVictory={player.mastery >= masteryGoal ? () => handleClaimVictory(player) : undefined}
                 />
               ))}
             </View>

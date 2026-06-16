@@ -24,6 +24,7 @@ interface PlayerPanelProps {
   onAdjustMastery: (amount: number) => void;
   onAdjustEcho: (amount: number) => void;
   onAdjustHusks: (amount: number) => void;
+  onClaimVictory?: () => void;
 }
 
 export function PlayerPanel({
@@ -33,6 +34,7 @@ export function PlayerPanel({
   onAdjustMastery,
   onAdjustEcho,
   onAdjustHusks,
+  onClaimVictory,
 }: PlayerPanelProps) {
   const masteryScale = useRef(new Animated.Value(1)).current;
   const masteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -143,6 +145,15 @@ export function PlayerPanel({
         </Animated.Text>
       </View>
 
+      {/* Claim victory button — appears once mastery goal is met */}
+      {onClaimVictory && (
+        <View style={styles.claimOverlay} pointerEvents="box-none">
+          <TouchableOpacity style={styles.claimBtn} onPress={onClaimVictory}>
+            <Text style={styles.claimBtnText}>CLAIM VICTORY</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Husk widget — top-right corner */}
       <View style={styles.huskOverlay} pointerEvents="box-none">
         <HuskWidget value={player.husks} onChange={onAdjustHusks} />
@@ -183,6 +194,26 @@ const styles = StyleSheet.create({
     right: spacing.sm,
     alignItems: 'flex-start',
     gap: 2,
+  },
+  claimOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 52,
+  },
+  claimBtn: {
+    borderWidth: 1,
+    borderColor: colors.gold,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(212,175,55,0.2)',
+  },
+  claimBtnText: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
+    color: colors.gold,
+    letterSpacing: 2,
   },
   huskOverlay: {
     position: 'absolute',
