@@ -47,7 +47,8 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
     if (intervalRef.current) clearInterval(intervalRef.current);
     timeoutRef.current = null;
     intervalRef.current = null;
-    isRepeatingRef.current = false;
+    // onPressOut fires before onPress — defer reset so onPress can still read the flag
+    setTimeout(() => { isRepeatingRef.current = false; }, 0);
   };
 
   return (

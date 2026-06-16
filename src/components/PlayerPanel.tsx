@@ -78,7 +78,8 @@ export function PlayerPanel({
     if (masteryIntervalRef.current) clearInterval(masteryIntervalRef.current);
     masteryTimeoutRef.current = null;
     masteryIntervalRef.current = null;
-    masteryIsRepeatingRef.current = false;
+    // onPressOut fires before onPress — defer reset so onPress can still read the flag
+    setTimeout(() => { masteryIsRepeatingRef.current = false; }, 0);
   };
 
   return (
