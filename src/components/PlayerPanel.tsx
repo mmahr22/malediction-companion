@@ -1,0 +1,180 @@
+import React, { useEffect, useRef } from 'react';
+import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { Player } from '../data/types';
+import { FactionDots } from './FactionDots';
+import { colors, fonts, spacing } from '../theme/theme';
+import { EchoWidget } from './EchoWidget';
+
+// Per-player dark gradient pairs: [highlight, deep-dark]
+export const PLAYER_GRADIENTS: [string, string][] = [
+  ['#6b1520', '#0d0305'],  // blood crimson
+  ['#1a3d6e', '#050e1c'],  // midnight navy
+  ['#1d5c1d', '#051005'],  // forest dark
+  ['#5c1a6b', '#130416'],  // deep violet
+  ['#1a5c5c', '#041313'],  // dark teal
+  ['#6b4012', '#1a0e05'],  // burnt amber
+];
+
+interface PlayerPanelProps {
+  player: Player;
+  colorIndex: number;
+  rotation: 0 | 90 | 180 | 270;
+  onAdjustMastery: (amount: number) => void;
+  onAdjustEcho: (amount: number) => void;
+}
+
+export function PlayerPanel({
+  player,
+  colorIndex,
+  rotation,
+  onAdjustMastery,
+  onAdjustEcho,
+}: PlayerPanelProps) {
+  const masteryScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.spring(masteryScale, { toValue: 1.12, useNativeDriver: false, speed: 30, bounciness: 4 }),
+      Animated.spring(masteryScale, { toValue: 1, useNativeDriver: false, speed: 30, bounciness: 0 }),
+    ]).start();
+  }, [player.mastery]);
+
+  // React Native transforms touch coordinates along with the visual rotation,
+  // so top always increments and bottom always decrements for every panel.
+  const topAction = 1;
+  const bottomAction = -1;
+
+  const echoPosition = { bottom: spacing.lg, right: spacing.lg };
+
+  const handleMastery = (amount: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onAdjustMastery(amount);
+  };
+
+  return (
+    <View style={[styles.panel, { transform: [{ rotate: `${rotation}deg` }] }]}>
+      {player.seeker?.image && (
+        <Image
+          source={player.seeker.image}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+        />
+      )}
+
+      {/* Dark scrim for legibility */}
+      <View style={styles.scrim} />
+
+      {/* Top tap zone */}
+      <TouchableOpacity
+        style={styles.tapZone}
+        onPress={() => handleMastery(topAction)}
+        activeOpacity={0.6}
+      >
+        <Text style={styles.tapHint}>{topAction > 0 ? '+' : '−'}</Text>
+      </TouchableOpacity>
+
+      {/* Bottom tap zone */}
+      <TouchableOpacity
+        style={styles.tapZone}
+        onPress={() => handleMastery(bottomAction)}
+        activeOpacity={0.6}
+      >
+        <Text style={styles.tapHint}>{bottomAction > 0 ? '+' : '−'}</Text>
+      </TouchableOpacity>
+
+      {/* Center overlay — mastery number + player name + seeker */}
+      <View style={styles.centerOverlay} pointerEvents="none">
+        <Animated.Text style={[styles.masteryValue, { transform: [{ scale: masteryScale }] }]}>
+          {player.mastery}
+        </Animated.Text>
+        <View style={styles.playerNameBadge}>
+          <Text style={styles.playerName}>{player.name}</Text>
+        </View>
+        {player.seeker && (
+          <View style={styles.seekerRow}>
+            <Text style={styles.seekerName}>{player.seeker.name}</Text>
+            <Text style={styles.seekerDot}> · </Text>
+            <FactionDots faction={player.seeker.faction} size={8} />
+          </View>
+        )}
+      </View>
+
+      {/* Echo widget — visual bottom-right of each player's perspective */}
+      <View style={[styles.echoOverlay, echoPosition]} pointerEvents="box-none">
+        <EchoWidget value={player.echo} onChange={onAdjustEcho} />
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  panel: {
+    flex: 1,
+    overflow: 'hidden',
+    borderRadius: 12,
+  },
+  scrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  tapZone: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tapHint: {
+    fontFamily: fonts.heading,
+    fontSize: 28,
+    color: 'rgba(255,255,255,0.30)',
+  },
+  centerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  masteryValue: {
+    fontFamily: fonts.heading,
+    fontSize: 96,
+    color: colors.gold,
+    lineHeight: 110,
+    textShadowColor: 'rgba(0,0,0,0.6)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 12,
+  },
+  playerNameBadge: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginTop: 4,
+  },
+  playerName: {
+    fontFamily: fonts.heading,
+    fontSize: 12,
+    color: colors.textPrimary,
+  },
+  echoOverlay: {
+    position: 'absolute',
+  },
+  seekerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  seekerName: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
+    color: colors.textMuted,
+    letterSpacing: 1,
+  },
+  seekerDot: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
+    color: colors.border,
+  },
+});
