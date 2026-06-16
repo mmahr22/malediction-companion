@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
+import { useNavigation } from '@react-navigation/native';
 import { useGameStore } from '../store/gameStore';
 import { Player } from '../data/types';
 import { PlayerPanel } from '../components/PlayerPanel';
@@ -48,11 +49,20 @@ function buildLayout(players: Player[]): LayoutRow[] {
 }
 
 export function GameTrackerScreen() {
+  const navigation = useNavigation();
   const players = useGameStore((s) => s.players);
   const isActive = useGameStore((s) => s.isActive);
   const adjustMastery = useGameStore((s) => s.adjustMastery);
   const adjustEcho = useGameStore((s) => s.adjustEcho);
   const adjustHusks = useGameStore((s) => s.adjustHusks);
+
+  useEffect(() => {
+    navigation.setOptions({
+      tabBarStyle: isActive
+        ? { display: 'none' }
+        : { backgroundColor: colors.surface, borderTopColor: colors.border },
+    });
+  }, [isActive, navigation]);
 
   useEffect(() => {
     if (isActive && players.length > 2) {
