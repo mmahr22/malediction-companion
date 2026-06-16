@@ -70,7 +70,10 @@ export function PlayerPanel({
       masteryIsRepeatingRef.current = true;
       handleMastery(amount);
       masteryTimeoutRef.current = setTimeout(() => {
-        masteryIntervalRef.current = setInterval(() => handleMastery(amount), 150);
+        handleMastery(amount);
+        masteryTimeoutRef.current = setTimeout(() => {
+          masteryIntervalRef.current = setInterval(() => handleMastery(amount), 150);
+        }, 300);
       }, 300);
     }, 400);
   };
