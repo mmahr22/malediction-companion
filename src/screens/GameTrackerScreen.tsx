@@ -52,6 +52,7 @@ export function GameTrackerScreen() {
   const isActive = useGameStore((s) => s.isActive);
   const adjustMastery = useGameStore((s) => s.adjustMastery);
   const adjustEcho = useGameStore((s) => s.adjustEcho);
+  const adjustHusks = useGameStore((s) => s.adjustHusks);
 
   useEffect(() => {
     if (isActive) {
@@ -86,6 +87,7 @@ export function GameTrackerScreen() {
                   rotation={rotation}
                   onAdjustMastery={(amount) => adjustMastery(player.id, amount)}
                   onAdjustEcho={(amount) => adjustEcho(player.id, amount)}
+                  onAdjustHusks={(amount) => adjustHusks(player.id, amount)}
                 />
               ))}
             </View>

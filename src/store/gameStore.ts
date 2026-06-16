@@ -9,9 +9,10 @@ interface PlayerSetup {
 }
 
 interface GameStore extends GameState {
-  startGame: (players: PlayerSetup[]) => void;
+  startGame: (players: PlayerSetup[], masteryGoal: number) => void;
   adjustMastery: (playerId: string, amount: number) => void;
   adjustEcho: (playerId: string, amount: number) => void;
+  adjustHusks: (playerId: string, amount: number) => void;
   incrementRound: () => void;
   decrementRound: () => void;
   resetGame: () => void;
@@ -23,16 +24,19 @@ export const useGameStore = create<GameStore>()(
       players: [],
       isActive: false,
       round: 1,
+      masteryGoal: 45,
 
-      startGame: (playerSetups) =>
+      startGame: (playerSetups, masteryGoal) =>
         set({
           isActive: true,
           round: 1,
+          masteryGoal,
           players: playerSetups.map(({ name, seeker }, index): Player => ({
             id: `player-${index}-${Date.now()}`,
             name: name.trim() || `Player ${index + 1}`,
             mastery: 0,
             echo: seeker?.legacy.startingEcho ?? 0,
+            husks: 0,
             seeker,
           })),
         }),
@@ -55,6 +59,22 @@ export const useGameStore = create<GameStore>()(
           ),
         })),
 
+      adjustHusks: (playerId, amount) =>
+        set((state) => {
+          const player = state.players.find((p) => p.id === playerId);
+          if (!player) return state;
+          const newHusks = Math.max(0, (player.husks ?? 0) + amount);
+          const delta = newHusks - (player.husks ?? 0);
+          if (delta === 0) return state;
+          return {
+            players: state.players.map((p) =>
+              p.id === playerId
+                ? { ...p, husks: newHusks, mastery: Math.max(0, (p.mastery ?? 0) + delta * 10) }
+                : p
+            ),
+          };
+        }),
+
       // Advancing the round auto-adds Echo to every player.
       // Amount = round × 2, capped at round 5 (max 10 Echo per advance).
       incrementRound: () =>
@@ -72,12 +92,12 @@ export const useGameStore = create<GameStore>()(
 
       decrementRound: () => set((state) => ({ round: Math.max(1, state.round - 1) })),
 
-      resetGame: () => set({ players: [], isActive: false, round: 1 }),
+      resetGame: () => set({ players: [], isActive: false, round: 1, masteryGoal: 45 }),
     }),
     {
       name: 'malediction:gameState',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 2,
+      version: 3,
       migrate: (stored: unknown) => {
         const state = stored as Record<string, unknown>;
         if (Array.isArray(state?.players)) {
@@ -85,9 +105,11 @@ export const useGameStore = create<GameStore>()(
             ...p,
             mastery: (p.mastery ?? (p as Record<string, unknown>).victoryPoints ?? 0) as number,
             echo: (p.echo ?? (p as Record<string, unknown>).resourcePoints ?? 0) as number,
+            husks: (p.husks ?? 0) as number,
             seeker: (p.seeker ?? null) as unknown,
           }));
         }
+        if (state.masteryGoal === undefined) state.masteryGoal = 45;
         return state;
       },
     }

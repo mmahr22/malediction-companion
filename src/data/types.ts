@@ -18,6 +18,7 @@ export interface Player {
   name: string;
   mastery: number;
   echo: number;
+  husks: number;
   seeker: Seeker | null;
 }
 
@@ -25,6 +26,7 @@ export interface GameState {
   players: Player[];
   isActive: boolean;
   round: number;
+  masteryGoal: number;
 }
 
 export interface Card {

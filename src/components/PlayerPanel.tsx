@@ -5,6 +5,7 @@ import { Player } from '../data/types';
 import { FactionDots } from './FactionDots';
 import { colors, fonts, spacing } from '../theme/theme';
 import { EchoWidget } from './EchoWidget';
+import { HuskWidget } from './HuskWidget';
 
 // Per-player dark gradient pairs: [highlight, deep-dark]
 export const PLAYER_GRADIENTS: [string, string][] = [
@@ -22,6 +23,7 @@ interface PlayerPanelProps {
   rotation: 0 | 90 | 180 | 270;
   onAdjustMastery: (amount: number) => void;
   onAdjustEcho: (amount: number) => void;
+  onAdjustHusks: (amount: number) => void;
 }
 
 export function PlayerPanel({
@@ -30,6 +32,7 @@ export function PlayerPanel({
   rotation,
   onAdjustMastery,
   onAdjustEcho,
+  onAdjustHusks,
 }: PlayerPanelProps) {
   const masteryScale = useRef(new Animated.Value(1)).current;
 
@@ -104,7 +107,12 @@ export function PlayerPanel({
         </Animated.Text>
       </View>
 
-      {/* Echo widget — visual bottom-right of each player's perspective */}
+      {/* Husk widget — top-right corner */}
+      <View style={styles.huskOverlay} pointerEvents="box-none">
+        <HuskWidget value={player.husks} onChange={onAdjustHusks} />
+      </View>
+
+      {/* Echo widget — bottom center */}
       <View style={[styles.echoOverlay, echoPosition]} pointerEvents="box-none">
         <EchoWidget value={player.echo} onChange={onAdjustEcho} />
       </View>
@@ -135,10 +143,15 @@ const styles = StyleSheet.create({
   nameHeader: {
     position: 'absolute',
     top: spacing.sm,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
+    left: spacing.sm,
+    right: spacing.sm,
+    alignItems: 'flex-start',
     gap: 2,
+  },
+  huskOverlay: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
   },
   centerOverlay: {
     ...StyleSheet.absoluteFillObject,

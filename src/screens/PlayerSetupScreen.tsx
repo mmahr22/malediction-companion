@@ -10,6 +10,14 @@ import { colors, fonts, radius, spacing } from '../theme/theme';
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 6;
 
+const MASTERY_PRESETS = [
+  { value: 25, label: '25', tag: 'Beginner' },
+  { value: 45, label: '45', tag: 'Standard' },
+  { value: 50, label: '50' },
+  { value: 55, label: '55' },
+  { value: 60, label: '60' },
+];
+
 interface PlayerEntry {
   name: string;
   seeker: Seeker | null;
@@ -24,6 +32,7 @@ export function PlayerSetupScreen() {
   const [playerCount, setPlayerCount] = useState(2);
   const [entries, setEntries] = useState<PlayerEntry[]>(defaultEntries(2));
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
+  const [masteryGoal, setMasteryGoal] = useState(45);
 
   const setPlayerCountAndResize = (count: number) => {
     setPlayerCount(count);
@@ -43,7 +52,7 @@ export function PlayerSetupScreen() {
   };
 
   const handleBegin = () => {
-    startGame(entries.map(({ name, seeker }) => ({ name, seeker })));
+    startGame(entries.map(({ name, seeker }) => ({ name, seeker })), masteryGoal);
   };
 
   return (
@@ -93,6 +102,26 @@ export function PlayerSetupScreen() {
             </TouchableOpacity>
           </View>
         ))}
+
+        <Text style={styles.label}>Mastery Goal</Text>
+        <View style={styles.row}>
+          {MASTERY_PRESETS.map((preset) => (
+            <TouchableOpacity
+              key={preset.value}
+              style={[styles.masteryButton, masteryGoal === preset.value && styles.masteryButtonActive]}
+              onPress={() => setMasteryGoal(preset.value)}
+            >
+              <Text style={[styles.masteryButtonValue, masteryGoal === preset.value && styles.masteryButtonValueActive]}>
+                {preset.label}
+              </Text>
+              {preset.tag && (
+                <Text style={[styles.masteryButtonTag, masteryGoal === preset.value && styles.masteryButtonTagActive]}>
+                  {preset.tag}
+                </Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
 
         <TouchableOpacity style={styles.startButton} onPress={handleBegin}>
           <Text style={styles.startButtonText}>Begin</Text>
@@ -208,6 +237,38 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     letterSpacing: 1,
+  },
+  masteryButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+  },
+  masteryButtonActive: {
+    borderColor: colors.gold,
+    backgroundColor: 'rgba(212,175,55,0.15)',
+  },
+  masteryButtonValue: {
+    fontFamily: fonts.heading,
+    fontSize: 16,
+    color: colors.textMuted,
+  },
+  masteryButtonValueActive: {
+    color: colors.gold,
+  },
+  masteryButtonTag: {
+    fontFamily: fonts.heading,
+    fontSize: 8,
+    color: colors.textMuted,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: 2,
+  },
+  masteryButtonTagActive: {
+    color: colors.gold,
   },
   startButton: {
     backgroundColor: 'rgba(212,175,55,0.12)',
