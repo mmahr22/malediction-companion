@@ -38,7 +38,9 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
     timeoutRef.current = setTimeout(() => {
       isRepeatingRef.current = true;
       handle(amount);
-      intervalRef.current = setInterval(() => handle(amount), 150);
+      timeoutRef.current = setTimeout(() => {
+        intervalRef.current = setInterval(() => handle(amount), 150);
+      }, 300);
     }, 400);
   };
 
