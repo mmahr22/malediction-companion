@@ -26,19 +26,17 @@ export function EchoWidget({ value, onChange }: EchoWidgetProps) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={styles.labelGroup}>
         <MaterialCommunityIcons name="diamond-stone" size={9} color={colors.purple} />
         <Text style={styles.label}> ECHO</Text>
       </View>
-      <View style={styles.row}>
-        <TouchableOpacity style={styles.btn} onPress={() => handle(-1)}>
-          <Text style={styles.btnText}>−</Text>
-        </TouchableOpacity>
-        <Animated.Text style={[styles.value, { transform: [{ scale }] }]}>{value}</Animated.Text>
-        <TouchableOpacity style={styles.btn} onPress={() => handle(1)}>
-          <Text style={styles.btnText}>+</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.btn} onPress={() => handle(-1)}>
+        <Text style={styles.btnText}>−</Text>
+      </TouchableOpacity>
+      <Animated.Text style={[styles.value, { transform: [{ scale }] }]}>{value}</Animated.Text>
+      <TouchableOpacity style={styles.btn} onPress={() => handle(1)}>
+        <Text style={styles.btnText}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -49,26 +47,21 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors.purple,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    minWidth: 80,
-  },
-  header: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'space-between',
+  },
+  labelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   label: {
     fontFamily: fonts.heading,
     fontSize: 9,
     color: colors.purple,
     letterSpacing: 1.5,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 4,
   },
   btn: {
     width: 20,

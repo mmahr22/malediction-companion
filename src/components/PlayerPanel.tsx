@@ -45,7 +45,7 @@ export function PlayerPanel({
   const topAction = 1;
   const bottomAction = -1;
 
-  const echoPosition = { bottom: spacing.lg, right: spacing.lg };
+  const echoPosition = { bottom: spacing.sm, left: spacing.lg, right: spacing.lg };
 
   const handleMastery = (amount: number) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -83,11 +83,8 @@ export function PlayerPanel({
         <Text style={styles.tapHint}>{bottomAction > 0 ? '+' : '−'}</Text>
       </TouchableOpacity>
 
-      {/* Center overlay — mastery number + player name + seeker */}
-      <View style={styles.centerOverlay} pointerEvents="none">
-        <Animated.Text style={[styles.masteryValue, { transform: [{ scale: masteryScale }] }]}>
-          {player.mastery}
-        </Animated.Text>
+      {/* Name header — pinned to top of panel */}
+      <View style={styles.nameHeader} pointerEvents="none">
         <View style={styles.playerNameBadge}>
           <Text style={styles.playerName}>{player.name}</Text>
         </View>
@@ -98,6 +95,13 @@ export function PlayerPanel({
             <FactionDots faction={player.seeker.faction} size={8} />
           </View>
         )}
+      </View>
+
+      {/* Center overlay — mastery number only */}
+      <View style={styles.centerOverlay} pointerEvents="none">
+        <Animated.Text style={[styles.masteryValue, { transform: [{ scale: masteryScale }] }]}>
+          {player.mastery}
+        </Animated.Text>
       </View>
 
       {/* Echo widget — visual bottom-right of each player's perspective */}
@@ -127,6 +131,14 @@ const styles = StyleSheet.create({
     fontFamily: fonts.heading,
     fontSize: 28,
     color: 'rgba(255,255,255,0.30)',
+  },
+  nameHeader: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    gap: 2,
   },
   centerOverlay: {
     ...StyleSheet.absoluteFillObject,
