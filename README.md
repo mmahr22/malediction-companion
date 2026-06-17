@@ -42,7 +42,7 @@ npx expo start --web  # browser
 
 ### Seeker Selection
 
-All 10 launch Seekers with full card art, faction sigils, Legacy card details, and starting Echo:
+All 10 Seekers with full card art, faction sigils, Legacy card details, and starting Echo:
 
 | Seeker | Faction(s) | Starting Echo | Legacy |
 |---|---|---|---|
