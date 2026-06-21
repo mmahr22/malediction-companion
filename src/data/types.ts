@@ -85,5 +85,11 @@ export interface Card {
 export interface Deck {
   id: string;
   name: string;
-  cardIds: string[];
+  seekerId: string;
+  mainDeck: Record<string, number>;
+  sideDeck: Record<string, number>;
+  terrainId: string | null;
+  notes: string;
+  createdAt: number;
+  updatedAt: number;
 }

@@ -7,8 +7,11 @@ import { GameTrackerScreen } from '../screens/GameTrackerScreen';
 import { CardDatabaseScreen } from '../screens/CardDatabaseScreen';
 import { CardDetailScreen } from '../screens/CardDetailScreen';
 import { DecklistsScreen } from '../screens/DecklistsScreen';
+import { DeckSummaryScreen } from '../screens/DeckSummaryScreen';
+import { DeckEditorScreen } from '../screens/DeckEditorScreen';
+import { CardDetailScreen as DeckCardDetailScreen } from '../screens/CardDetailScreen';
 import { GameHistoryScreen } from '../screens/GameHistoryScreen';
-import { CardsStackParamList } from './types';
+import { CardsStackParamList, DecksStackParamList } from './types';
 import { colors, fonts } from '../theme/theme';
 
 const navTheme = {
@@ -33,6 +36,7 @@ const headerOptions = {
 
 const Tab = createBottomTabNavigator();
 const CardsStack = createNativeStackNavigator<CardsStackParamList>();
+const DecksStack = createNativeStackNavigator<DecksStackParamList>();
 
 function CardsStackNavigator() {
   return (
@@ -40,6 +44,17 @@ function CardsStackNavigator() {
       <CardsStack.Screen name="CardDatabase" component={CardDatabaseScreen} options={{ title: 'Cards' }} />
       <CardsStack.Screen name="CardDetail" component={CardDetailScreen} options={{ title: 'Card Details' }} />
     </CardsStack.Navigator>
+  );
+}
+
+function DecksStackNavigator() {
+  return (
+    <DecksStack.Navigator screenOptions={headerOptions}>
+      <DecksStack.Screen name="DeckList" component={DecklistsScreen} options={{ title: 'Decks' }} />
+      <DecksStack.Screen name="DeckSummary" component={DeckSummaryScreen} options={{ title: 'Deck Summary' }} />
+      <DecksStack.Screen name="DeckEditor" component={DeckEditorScreen} options={{ title: 'Deck Builder' }} />
+      <DecksStack.Screen name="DeckCardDetail" component={DeckCardDetailScreen} options={{ title: 'Card Details' }} />
+    </DecksStack.Navigator>
   );
 }
 
@@ -70,7 +85,7 @@ export function RootNavigator() {
           options={{ title: 'Malediction Companion', tabBarLabel: 'Game Tracker' }}
         />
         <Tab.Screen name="Cards" component={CardsStackNavigator} options={{ headerShown: false }} />
-        <Tab.Screen name="Decks" component={DecklistsScreen} />
+        <Tab.Screen name="Decks" component={DecksStackNavigator} options={{ headerShown: false }} />
         <Tab.Screen name="History" component={GameHistoryScreen} />
       </Tab.Navigator>
     </NavigationContainer>

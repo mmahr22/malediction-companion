@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useReducer, useState } from 'react';
+import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { CardsStackParamList } from '../navigation/types';
 import { FACTION_COLORS, FACTION_IMAGES } from '../theme/factions';
 import { Card } from '../data/types';
+import { activeBridge } from '../store/deckEditorBridge';
 import { colors, fonts, spacing } from '../theme/theme';
 
-type DetailRoute = RouteProp<CardsStackParamList, 'CardDetail'>;
+type DetailRoute = RouteProp<{ CardDetail: { card: Card } }, 'CardDetail'>;
 
 const RANK_COLORS: Record<Card['rank'], string> = {
   Basic: colors.textMuted,
@@ -34,6 +34,10 @@ export function CardDetailScreen() {
   const rankColor = RANK_COLORS[card.rank];
   const hasStats = card.type === 'Unit' && card.accuracy !== undefined;
   const [lightboxVisible, setLightboxVisible] = useState(false);
+  const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
+  const bridge = activeBridge;
+  const inDeck = bridge ? bridge.getCount(card.id) : 0;
+  const limit = bridge ? bridge.getLimit(card) : 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -129,6 +133,26 @@ export function CardDetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      {bridge && (
+        <View style={styles.deckBar}>
+          <TouchableOpacity
+            style={styles.deckBarBtn}
+            onPress={() => { bridge.removeCard(card); forceUpdate(); }}
+            disabled={inDeck <= 0}
+          >
+            <Text style={[styles.deckBarBtnText, inDeck <= 0 && styles.deckBarBtnDisabled]}>−</Text>
+          </TouchableOpacity>
+          <Text style={styles.deckBarCount}>{inDeck} / {limit}</Text>
+          <TouchableOpacity
+            style={styles.deckBarBtn}
+            onPress={() => { bridge.addCard(card); forceUpdate(); }}
+            disabled={inDeck >= limit}
+          >
+            <Text style={[styles.deckBarBtnText, inDeck >= limit && styles.deckBarBtnDisabled]}>+</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -311,5 +335,41 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.border,
     letterSpacing: 2,
+  },
+
+  // Deck builder bar
+  deckBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.lg,
+    paddingVertical: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  deckBarBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.gold,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deckBarBtnText: {
+    fontFamily: fonts.heading,
+    fontSize: 24,
+    color: colors.gold,
+  },
+  deckBarBtnDisabled: {
+    color: colors.border,
+  },
+  deckBarCount: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.textPrimary,
+    minWidth: 50,
+    textAlign: 'center',
   },
 });
