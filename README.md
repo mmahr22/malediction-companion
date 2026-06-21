@@ -4,7 +4,7 @@
 
 A mobile + web companion app for the dark fantasy miniatures card game **[Malediction](https://loot-studios.com/malediction)**. Replaces tokens, dice, and pen-and-paper for 2–6 players — track Mastery, Echo, Husks, initiative, and round progression while keeping your eyes on the battlefield.
 
-Built with React Native + Expo. Runs on **iOS**, **Android**, and **web**.
+Built with React Native + Expo. Runs on **Android**, and **web**.
 
 ---
 
