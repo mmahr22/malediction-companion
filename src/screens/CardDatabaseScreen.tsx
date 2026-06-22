@@ -57,7 +57,7 @@ function CardRow({ card, onPress }: { card: Card; onPress: () => void }) {
   return (
     <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.75}>
       {card.image ? (
-        <Image source={{ uri: card.image }} style={[styles.thumb, styles.thumbBg]} resizeMode="contain" />
+        <Image source={card.image} style={[styles.thumb, styles.thumbBg]} resizeMode="contain" />
       ) : (
         <View style={[styles.thumb, styles.thumbPlaceholder]} />
       )}

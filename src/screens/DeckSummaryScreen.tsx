@@ -197,7 +197,7 @@ export function DeckSummaryScreen() {
           >
             {item.card.image ? (
               <Image
-                source={{ uri: item.card.image }}
+                source={item.card.image}
                 style={styles.cardThumb}
                 resizeMode="contain"
               />

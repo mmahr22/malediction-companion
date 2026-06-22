@@ -537,7 +537,7 @@ function CardBuilderRow({
       <TouchableOpacity style={styles.rowTappable} onPress={onDetail} activeOpacity={0.75}>
         {card.image ? (
           <Image
-            source={{ uri: card.image }}
+            source={card.image}
             style={[styles.thumb, styles.thumbBg]}
             resizeMode="contain"
           />

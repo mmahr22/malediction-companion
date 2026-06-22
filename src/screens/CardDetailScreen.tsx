@@ -51,7 +51,7 @@ export function CardDetailScreen() {
         >
           <Pressable style={styles.lightboxBackdrop} onPress={() => setLightboxVisible(false)}>
             <Image
-              source={{ uri: card.image }}
+              source={card.image}
               style={styles.lightboxImage}
               resizeMode="contain"
             />
@@ -66,7 +66,7 @@ export function CardDetailScreen() {
           <View style={styles.imageColumn}>
             {card.image ? (
               <Pressable onPress={() => setLightboxVisible(true)} style={{ flex: 1 }}>
-                <Image source={{ uri: card.image }} style={styles.cardImage} resizeMode="contain" />
+                <Image source={card.image} style={styles.cardImage} resizeMode="contain" />
               </Pressable>
             ) : (
               <View style={styles.imagePlaceholder}>

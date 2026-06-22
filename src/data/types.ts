@@ -79,7 +79,7 @@ export interface Card {
   maxHealth?: number;
   baseSize?: string;
   abilities: CardAbility[];
-  image?: string;
+  image?: number;
 }
 
 export interface Deck {
