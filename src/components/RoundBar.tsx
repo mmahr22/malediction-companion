@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -12,7 +12,21 @@ export function RoundBar() {
   const masteryGoal = useGameStore((s) => s.masteryGoal);
   const incrementRound = useGameStore((s) => s.incrementRound);
   const resetGame = useGameStore((s) => s.resetGame);
+  const undo = useGameStore((s) => s.undo);
+  const canUndo = useGameStore((s) => s.undoStack.length > 0);
   const addRecord = useHistoryStore((s) => s.addRecord);
+
+  const startTime = useRef(Date.now());
+  const [elapsed, setElapsed] = useState('00:00');
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const diff = Math.floor((Date.now() - startTime.current) / 1000);
+      const m = String(Math.floor(diff / 60)).padStart(2, '0');
+      const s = String(diff % 60).padStart(2, '0');
+      setElapsed(`${m}:${s}`);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleIncrement = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -53,13 +67,18 @@ export function RoundBar() {
         <MaterialCommunityIcons name="reload" size={16} color={colors.danger} />
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.endButton} onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); undo(); }} disabled={!canUndo}>
+        <MaterialCommunityIcons name="undo" size={16} color={canUndo ? colors.textMuted : colors.border} />
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.roundDisplay} onPress={handleIncrement} activeOpacity={0.7}>
         <Text style={styles.roundLabel}>Round</Text>
         <Text style={styles.roundNumber}>{round}</Text>
       </TouchableOpacity>
 
-      {/* Spacer to balance the skull button */}
-      <View style={styles.endButton} />
+      <View style={styles.endButton}>
+        <Text style={styles.timer}>{elapsed}</Text>
+      </View>
     </View>
   );
 }
@@ -98,5 +117,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: colors.gold,
     lineHeight: 38,
+  },
+  timer: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
+    color: colors.textMuted,
+    letterSpacing: 1,
   },
 });

@@ -25,9 +25,11 @@ interface PlayerPanelProps {
   onAdjustMastery: (amount: number) => void;
   onAdjustEcho: (amount: number) => void;
   onAdjustHusks: (amount: number) => void;
+  maxHusks: number;
   onClaimVictory?: () => void;
   hasInitiative: boolean;
   onClaimInitiative: () => void;
+  masteryGoal: number;
 }
 
 export function PlayerPanel({
@@ -37,9 +39,11 @@ export function PlayerPanel({
   onAdjustMastery,
   onAdjustEcho,
   onAdjustHusks,
+  maxHusks,
   onClaimVictory,
   hasInitiative,
   onClaimInitiative,
+  masteryGoal,
 }: PlayerPanelProps) {
   const masteryScale = useRef(new Animated.Value(1)).current;
   const masteryIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -158,9 +162,14 @@ export function PlayerPanel({
 
       {/* Center overlay — mastery number only */}
       <View style={styles.centerOverlay} pointerEvents="none">
+        <Text style={styles.masteryLabel}>MASTERY</Text>
         <Animated.Text style={[styles.masteryValue, { transform: [{ scale: masteryScale }] }]}>
           {player.mastery}
         </Animated.Text>
+        <View style={styles.progressContainer}>
+          <View style={[styles.progressFill, { width: `${Math.min(100, (player.mastery / masteryGoal) * 100)}%` }]} />
+        </View>
+        <Text style={styles.progressText}>{player.mastery}/{masteryGoal}</Text>
       </View>
 
       {/* Claim victory button — appears once mastery goal is met */}
@@ -174,7 +183,7 @@ export function PlayerPanel({
 
       {/* Husk widget — top-right corner */}
       <View style={styles.huskOverlay} pointerEvents="box-none">
-        <HuskWidget value={player.husks} onChange={onAdjustHusks} />
+        <HuskWidget value={player.husks} max={maxHusks} onChange={onAdjustHusks} />
       </View>
 
       {/* Echo widget — bottom center */}
@@ -313,5 +322,29 @@ const styles = StyleSheet.create({
     fontFamily: fonts.heading,
     fontSize: 11,
     color: colors.border,
+  },
+  masteryLabel: {
+    fontFamily: fonts.heading,
+    fontSize: 9,
+    letterSpacing: 2,
+    color: 'rgba(255,255,255,0.3)',
+  },
+  progressContainer: {
+    width: 120,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginTop: 4,
+  },
+  progressFill: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.gold,
+  },
+  progressText: {
+    fontFamily: fonts.heading,
+    fontSize: 10,
+    color: colors.textMuted,
+    marginTop: 2,
   },
 });

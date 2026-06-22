@@ -6,26 +6,43 @@ import { colors, fonts, radius, spacing } from '../theme/theme';
 
 interface HuskWidgetProps {
   value: number;
+  max: number;
   onChange: (amount: number) => void;
 }
 
-export function HuskWidget({ value, onChange }: HuskWidgetProps) {
-  const handle = (amount: number) => {
+export function HuskWidget({ value, max, onChange }: HuskWidgetProps) {
+  const toggle = (index: number) => {
+    const isFilled = index < value;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    onChange(amount);
+    if (isFilled) {
+      onChange(-(value - index));
+    } else {
+      onChange(index + 1 - value);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons name="skull" size={9} color={colors.gold} />
-      <Text style={styles.label}> HUSKS</Text>
-      <TouchableOpacity style={styles.btn} onPress={() => handle(-1)}>
-        <Text style={styles.btnText}>−</Text>
-      </TouchableOpacity>
-      <Text style={styles.value}>{value}</Text>
-      <TouchableOpacity style={styles.btn} onPress={() => handle(1)}>
-        <Text style={styles.btnText}>+</Text>
-      </TouchableOpacity>
+      <MaterialCommunityIcons name="skull" size={10} color={colors.gold} />
+      <View style={styles.tokens}>
+        {Array.from({ length: max }, (_, i) => {
+          const filled = i < value;
+          return (
+            <TouchableOpacity
+              key={i}
+              style={[styles.token, filled && styles.tokenFilled]}
+              onPress={() => toggle(i)}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="skull"
+                size={14}
+                color={filled ? colors.gold : 'rgba(212,175,55,0.25)'}
+              />
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -42,33 +59,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  label: {
-    fontFamily: fonts.heading,
-    fontSize: 9,
-    color: colors.gold,
-    letterSpacing: 1.5,
+  tokens: {
+    flexDirection: 'row',
+    gap: 2,
   },
-  btn: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: colors.gold,
+  token: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(212,175,55,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,175,55,0.2)',
   },
-  btnText: {
-    fontFamily: fonts.heading,
-    fontSize: 12,
-    color: colors.gold,
-    lineHeight: 14,
-  },
-  value: {
-    fontFamily: fonts.heading,
-    fontSize: 16,
-    color: colors.gold,
-    minWidth: 16,
-    textAlign: 'center',
+  tokenFilled: {
+    backgroundColor: 'rgba(212,175,55,0.25)',
+    borderColor: colors.gold,
   },
 });

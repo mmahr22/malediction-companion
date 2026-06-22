@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import * as Haptics from 'expo-haptics';
@@ -69,10 +69,25 @@ export function GameTrackerScreen() {
 
   const addRecord = useHistoryStore((s) => s.addRecord);
   const [winner, setWinner] = useState<{ name: string; mastery: number } | null>(null);
+  const [echoToast, setEchoToast] = useState<string | null>(null);
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+  const prevRound = useRef(round);
 
   useEffect(() => {
     if (!isActive) setWinner(null);
   }, [isActive]);
+
+  useEffect(() => {
+    if (round > prevRound.current && isActive) {
+      const gain = Math.min(round, 5) * 2;
+      setEchoToast(`+${gain} Echo`);
+      toastOpacity.setValue(1);
+      Animated.timing(toastOpacity, { toValue: 0, duration: 2000, useNativeDriver: true }).start(() => {
+        setEchoToast(null);
+      });
+    }
+    prevRound.current = round;
+  }, [round]);
 
   const handleClaimVictory = (player: Player) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -116,6 +131,7 @@ export function GameTrackerScreen() {
 
   const rows = buildLayout(players);
   const colorOf = (p: Player) => players.indexOf(p);
+  const maxHusks = masteryGoal === 25 ? 2 : 4;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom', 'left', 'right']}>
@@ -133,15 +149,23 @@ export function GameTrackerScreen() {
                   onAdjustMastery={(amount) => adjustMastery(player.id, amount)}
                   onAdjustEcho={(amount) => adjustEcho(player.id, amount)}
                   onAdjustHusks={(amount) => adjustHusks(player.id, amount)}
+                  maxHusks={maxHusks}
                   onClaimVictory={player.mastery >= masteryGoal ? () => handleClaimVictory(player) : undefined}
                   hasInitiative={initiativePlayerId === player.id}
                   onClaimInitiative={() => claimInitiative(player.id)}
+                  masteryGoal={masteryGoal}
                 />
               ))}
             </View>
           </React.Fragment>
         ))}
       </View>
+
+      {echoToast && (
+        <Animated.View style={[styles.echoToast, { opacity: toastOpacity }]} pointerEvents="none">
+          <Text style={styles.echoToastText}>{echoToast}</Text>
+        </Animated.View>
+      )}
 
       {winner && (
         <View style={styles.winOverlay}>
@@ -210,5 +234,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.gold,
     letterSpacing: 3,
+  },
+  echoToast: {
+    position: 'absolute',
+    alignSelf: 'center',
+    top: '45%',
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: colors.purple,
+  },
+  echoToastText: {
+    fontFamily: fonts.heading,
+    fontSize: 18,
+    color: colors.purple,
+    letterSpacing: 2,
   },
 });
