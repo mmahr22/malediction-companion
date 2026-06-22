@@ -19,6 +19,11 @@ type LayoutRow = { cells: LayoutCell[]; flex?: number };
 function buildLayout(players: Player[]): LayoutRow[] {
   const [p1, p2, p3, p4, p5, p6] = players;
   switch (players.length) {
+    case 1:
+      return [
+        { cells: [], flex: 0 },
+        { cells: [{ player: p1, rotation: 0 }] },
+      ];
     case 2:
       return [
         { cells: [{ player: p2, rotation: 180 }] },
