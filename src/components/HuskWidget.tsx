@@ -23,7 +23,7 @@ export function HuskWidget({ value, max, onChange }: HuskWidgetProps) {
 
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons name="skull" size={10} color={colors.gold} />
+      <MaterialCommunityIcons name="skull" size={12} color={colors.gold} />
       <View style={styles.tokens}>
         {Array.from({ length: max }, (_, i) => {
           const filled = i < value;
@@ -36,7 +36,7 @@ export function HuskWidget({ value, max, onChange }: HuskWidgetProps) {
             >
               <MaterialCommunityIcons
                 name="skull"
-                size={14}
+                size={18}
                 color={filled ? colors.gold : 'rgba(212,175,55,0.25)'}
               />
             </TouchableOpacity>
@@ -64,9 +64,9 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   token: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,

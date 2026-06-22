@@ -10,6 +10,7 @@ import { Player } from '../data/types';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { RoundBar } from '../components/RoundBar';
 import { PlayerSetupScreen } from './PlayerSetupScreen';
+import { useKeepAwake } from 'expo-keep-awake';
 import { colors, fonts, spacing, radius } from '../theme/theme';
 
 type Rotation = 0 | 90 | 180 | 270;
@@ -66,6 +67,8 @@ export function GameTrackerScreen() {
   const initiativePlayerId = useGameStore((s) => s.initiativePlayerId);
   const claimInitiative = useGameStore((s) => s.claimInitiative);
   const resetGame = useGameStore((s) => s.resetGame);
+
+  useKeepAwake();
 
   const addRecord = useHistoryStore((s) => s.addRecord);
   const [winner, setWinner] = useState<{ name: string; mastery: number } | null>(null);
