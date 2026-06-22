@@ -9,7 +9,7 @@ import { NewProfileModal } from '../components/NewProfileModal';
 import { FactionDots } from '../components/FactionDots';
 import { colors, fonts, radius, spacing } from '../theme/theme';
 
-const MIN_PLAYERS = 2;
+const MIN_PLAYERS = 1;
 const MAX_PLAYERS = 6;
 
 const MASTERY_PRESETS = [
@@ -34,6 +34,8 @@ export function PlayerSetupScreen() {
   const startGame = useGameStore((s) => s.startGame);
   const profiles = useProfileStore((s) => s.profiles);
   const createProfile = useProfileStore((s) => s.createProfile);
+  const updateProfile = useProfileStore((s) => s.updateProfile);
+  const deleteProfile = useProfileStore((s) => s.deleteProfile);
 
   const [playerCount, setPlayerCount] = useState(2);
   const [entries, setEntries] = useState<PlayerEntry[]>(defaultEntries(2));
@@ -41,6 +43,7 @@ export function PlayerSetupScreen() {
   const [masteryGoal, setMasteryGoal] = useState(45);
   const [showNewProfile, setShowNewProfile] = useState(false);
   const [newProfileForIndex, setNewProfileForIndex] = useState<number | null>(null);
+  const [editingProfile, setEditingProfile] = useState<PlayerProfile | null>(null);
 
   const setPlayerCountAndResize = (count: number) => {
     setPlayerCount(count);
@@ -163,6 +166,7 @@ export function PlayerSetupScreen() {
                     entry.profileId === p.id && { backgroundColor: `${p.color}30` },
                   ]}
                   onPress={() => selectProfile(i, p)}
+                  onLongPress={() => setEditingProfile(p)}
                 >
                   <View style={[styles.profileDot, { backgroundColor: p.color }]} />
                   <Text style={[styles.profilePillText, { color: p.color }]}>{p.name}</Text>
@@ -208,6 +212,26 @@ export function PlayerSetupScreen() {
         visible={showNewProfile}
         onCreate={handleProfileCreated}
         onClose={() => { setShowNewProfile(false); setNewProfileForIndex(null); }}
+      />
+
+      <NewProfileModal
+        visible={!!editingProfile}
+        profile={editingProfile}
+        onUpdate={(id, name, color) => {
+          updateProfile(id, name, color);
+          setEntries((prev) => prev.map((e) =>
+            e.profileId === id ? { ...e, name } : e
+          ));
+          setEditingProfile(null);
+        }}
+        onDelete={(id) => {
+          deleteProfile(id);
+          setEntries((prev) => prev.map((e) =>
+            e.profileId === id ? { ...e, profileId: null, name: '' } : e
+          ));
+          setEditingProfile(null);
+        }}
+        onClose={() => setEditingProfile(null)}
       />
     </SafeAreaView>
   );

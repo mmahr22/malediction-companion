@@ -142,8 +142,8 @@ export function PlayerPanel({
           >
             <MaterialCommunityIcons
               name="sword-cross"
-              size={12}
-              color={hasInitiative ? colors.gold : 'rgba(255,255,255,0.25)'}
+              size={16}
+              color={hasInitiative ? colors.gold : 'rgba(255,255,255,0.4)'}
             />
           </TouchableOpacity>
         </View>
@@ -225,13 +225,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   initiativeIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   initiativeIconActive: {
     borderColor: colors.gold,

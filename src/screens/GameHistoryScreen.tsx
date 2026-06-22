@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useHistoryStore } from '../store/historyStore';
 import { useProfileStore } from '../store/profileStore';
+import { NewProfileModal } from '../components/NewProfileModal';
 import { GameRecord, PlayerProfile } from '../data/types';
 import { colors, fonts, radius, spacing } from '../theme/theme';
 
@@ -32,11 +33,13 @@ function ProfileCard({
   records,
   selected,
   onPress,
+  onLongPress,
 }: {
   profile: PlayerProfile;
   records: GameRecord[];
   selected: boolean;
   onPress: () => void;
+  onLongPress: () => void;
 }) {
   const { games, wins, favoriteSeeker } = getProfileStats(records, profile.id);
   const winRate = games > 0 ? Math.round((wins / games) * 100) : 0;
@@ -45,6 +48,7 @@ function ProfileCard({
     <TouchableOpacity
       style={[styles.profileCard, { borderColor: profile.color }, selected && { backgroundColor: `${profile.color}20` }]}
       onPress={onPress}
+      onLongPress={onLongPress}
       activeOpacity={0.75}
     >
       <View style={[styles.profileDot, { backgroundColor: profile.color }]} />
@@ -56,11 +60,22 @@ function ProfileCard({
   );
 }
 
-function GameRecordCard({ record }: { record: GameRecord }) {
+function GameRecordCard({ record, onDelete }: { record: GameRecord; onDelete: () => void }) {
   const winner = record.players.find((p) => p.isWinner);
 
+  const handleLongPress = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Delete this game record?')) onDelete();
+    } else {
+      Alert.alert('Delete Record', 'Delete this game record?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: onDelete },
+      ]);
+    }
+  };
+
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card} onLongPress={handleLongPress} activeOpacity={0.9}>
       <View style={styles.cardHeader}>
         <Text style={styles.dateText}>{formatDate(record.date)}</Text>
         <Text style={styles.metaText}>
@@ -97,16 +112,20 @@ function GameRecordCard({ record }: { record: GameRecord }) {
           </View>
         </View>
       ))}
-    </View>
+    </TouchableOpacity>
   );
 }
 
 export function GameHistoryScreen() {
   const records = useHistoryStore((s) => s.records);
+  const deleteRecord = useHistoryStore((s) => s.deleteRecord);
   const clearHistory = useHistoryStore((s) => s.clearHistory);
   const profiles = useProfileStore((s) => s.profiles);
+  const updateProfile = useProfileStore((s) => s.updateProfile);
+  const deleteProfile = useProfileStore((s) => s.deleteProfile);
 
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [editingProfile, setEditingProfile] = useState<PlayerProfile | null>(null);
 
   const profilesWithGames = profiles.filter((p) =>
     records.some((r) => r.players.some((pl) => pl.profileId === p.id))
@@ -137,7 +156,7 @@ export function GameHistoryScreen() {
       <FlatList
         data={filteredRecords}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <GameRecordCard record={item} />}
+        renderItem={({ item }) => <GameRecordCard record={item} onDelete={() => deleteRecord(item.id)} />}
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           profilesWithGames.length > 0 ? (
@@ -155,6 +174,7 @@ export function GameHistoryScreen() {
                     records={records}
                     selected={selectedProfileId === p.id}
                     onPress={() => handleProfilePress(p.id)}
+                    onLongPress={() => setEditingProfile(p)}
                   />
                 ))}
               </ScrollView>
@@ -172,6 +192,21 @@ export function GameHistoryScreen() {
             <Text style={styles.clearBtnText}>Clear History</Text>
           </TouchableOpacity>
         }
+      />
+
+      <NewProfileModal
+        visible={!!editingProfile}
+        profile={editingProfile}
+        onUpdate={(id, name, color) => {
+          updateProfile(id, name, color);
+          setEditingProfile(null);
+        }}
+        onDelete={(id) => {
+          deleteProfile(id);
+          if (selectedProfileId === id) setSelectedProfileId(null);
+          setEditingProfile(null);
+        }}
+        onClose={() => setEditingProfile(null)}
       />
     </SafeAreaView>
   );

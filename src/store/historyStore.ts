@@ -6,6 +6,7 @@ import { GameRecord, GamePlayerRecord } from '../data/types';
 interface HistoryStore {
   records: GameRecord[];
   addRecord: (data: { masteryGoal: number; rounds: number; players: GamePlayerRecord[] }) => void;
+  deleteRecord: (id: string) => void;
   clearHistory: () => void;
 }
 
@@ -21,6 +22,9 @@ export const useHistoryStore = create<HistoryStore>()(
             ...state.records,
           ],
         })),
+
+      deleteRecord: (id) =>
+        set((state) => ({ records: state.records.filter((r) => r.id !== id) })),
 
       clearHistory: () => set({ records: [] }),
     }),

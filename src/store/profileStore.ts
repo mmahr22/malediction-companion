@@ -6,6 +6,7 @@ import { PlayerProfile } from '../data/types';
 interface ProfileStore {
   profiles: PlayerProfile[];
   createProfile: (name: string, color: string) => PlayerProfile;
+  updateProfile: (id: string, name: string, color: string) => void;
   deleteProfile: (id: string) => void;
 }
 
@@ -24,6 +25,13 @@ export const useProfileStore = create<ProfileStore>()(
         set((state) => ({ profiles: [...state.profiles, profile] }));
         return profile;
       },
+
+      updateProfile: (id, name, color) =>
+        set((state) => ({
+          profiles: state.profiles.map((p) =>
+            p.id === id ? { ...p, name: name.trim(), color } : p
+          ),
+        })),
 
       deleteProfile: (id) =>
         set((state) => ({ profiles: state.profiles.filter((p) => p.id !== id) })),

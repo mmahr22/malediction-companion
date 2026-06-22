@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { PlayerProfile } from '../data/types';
 import { colors, fonts, radius, spacing } from '../theme/theme';
 
 export const PROFILE_COLORS = [
@@ -20,19 +21,37 @@ export const PROFILE_COLORS = [
   '#C0557A', // rose
 ];
 
-interface NewProfileModalProps {
+interface ProfileModalProps {
   visible: boolean;
-  onCreate: (name: string, color: string) => void;
+  profile?: PlayerProfile | null;
+  onCreate?: (name: string, color: string) => void;
+  onUpdate?: (id: string, name: string, color: string) => void;
+  onDelete?: (id: string) => void;
   onClose: () => void;
 }
 
-export function NewProfileModal({ visible, onCreate, onClose }: NewProfileModalProps) {
+export function NewProfileModal({ visible, profile, onCreate, onUpdate, onDelete, onClose }: ProfileModalProps) {
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState(PROFILE_COLORS[0]);
+  const isEditing = !!profile;
 
-  const handleCreate = () => {
+  useEffect(() => {
+    if (visible && profile) {
+      setName(profile.name);
+      setSelectedColor(profile.color);
+    } else if (visible) {
+      setName('');
+      setSelectedColor(PROFILE_COLORS[0]);
+    }
+  }, [visible, profile]);
+
+  const handleSubmit = () => {
     if (!name.trim()) return;
-    onCreate(name.trim(), selectedColor);
+    if (isEditing && onUpdate) {
+      onUpdate(profile!.id, name.trim(), selectedColor);
+    } else if (onCreate) {
+      onCreate(name.trim(), selectedColor);
+    }
     setName('');
     setSelectedColor(PROFILE_COLORS[0]);
   };
@@ -47,7 +66,7 @@ export function NewProfileModal({ visible, onCreate, onClose }: NewProfileModalP
     <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.title}>New Profile</Text>
+          <Text style={styles.title}>{isEditing ? 'Edit Profile' : 'New Profile'}</Text>
 
           <TextInput
             style={styles.input}
@@ -80,12 +99,21 @@ export function NewProfileModal({ visible, onCreate, onClose }: NewProfileModalP
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.createBtn, !name.trim() && styles.createBtnDisabled]}
-              onPress={handleCreate}
+              onPress={handleSubmit}
               disabled={!name.trim()}
             >
-              <Text style={styles.createText}>Create</Text>
+              <Text style={styles.createText}>{isEditing ? 'Save' : 'Create'}</Text>
             </TouchableOpacity>
           </View>
+
+          {isEditing && onDelete && (
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={() => onDelete(profile!.id)}
+            >
+              <Text style={styles.deleteText}>Delete Profile</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -184,6 +212,19 @@ const styles = StyleSheet.create({
     fontFamily: fonts.heading,
     fontSize: 13,
     color: colors.gold,
+    letterSpacing: 1,
+  },
+  deleteBtn: {
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    marginTop: spacing.sm,
+  },
+  deleteText: {
+    fontFamily: fonts.heading,
+    fontSize: 12,
+    color: colors.danger,
     letterSpacing: 1,
   },
 });
